@@ -1,0 +1,33 @@
+{
+    "name": "boton_panico",
+    "version": "1.0.0",
+    "description": "Boton de panico para comercios",
+    "main": "src/views/app.js",
+    "engines": {
+        "node": "12.x",
+        "npm": "6.x"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node /dist/index.js",
+        "html": "copyfiles --up 1 src/public/*.html dist"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "copyfiles": "^2.1.1",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "mysql": "github:mysqljs/mysql",
+        "socket.io": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.6",
+        "@types/express": "^4.17.1",
+        "@types/mysql": "^2.15.7",
+        "@types/socket.io": "^2.1.3",
+        "morgan": "^1.9.1",
+        "nodemon": "^1.19.2"
+    }
+}
