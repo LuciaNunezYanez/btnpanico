@@ -2,6 +2,7 @@ import express = require('express');
 import path = require('path');
 import socketIO from 'socket.io';
 import http from 'http';
+import { SERVER_PORT } from '../../global/enviroments';
 
 export default class Server{
     private static _instance: Server;
@@ -12,7 +13,7 @@ export default class Server{
     public httpServer: http.Server;
 
     private constructor(){
-        this.port = 3000;
+        this.port = SERVER_PORT;
         this.app = express();
         
         // Inicializar conf de sockets 

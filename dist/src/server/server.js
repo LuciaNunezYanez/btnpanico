@@ -7,9 +7,10 @@ var express = require("express");
 var path = require("path");
 var socket_io_1 = __importDefault(require("socket.io"));
 var http_1 = __importDefault(require("http"));
+var enviroments_1 = require("../../global/enviroments");
 var Server = /** @class */ (function () {
     function Server() {
-        this.port = 3000;
+        this.port = enviroments_1.SERVER_PORT;
         this.app = express();
         // Inicializar conf de sockets 
         this.httpServer = new http_1.default.Server(this.app);

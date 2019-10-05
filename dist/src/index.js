@@ -1,5 +1,5 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function(mod) {
+var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -10,6 +10,7 @@ var multimedia_1 = __importDefault(require("./router/multimedia"));
 var nota_1 = __importDefault(require("./router/nota"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var cors_1 = __importDefault(require("cors"));
+var enviroments_1 = require("../global/enviroments");
 var server = server_1.default.instance;
 // BodyParser
 server.app.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -23,6 +24,6 @@ server.app.use('/multimedia', multimedia_1.default);
 server.app.use('/nota', nota_1.default);
 // MySQL get instance 
 // MySQL.instance;
-server.start(function() {
-    console.log('Servidor corriendo en el puerto 3000');
+server.start(function () {
+    console.log("Servidor corriendo en el puerto " + enviroments_1.SERVER_PORT);
 });
