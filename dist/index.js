@@ -1,5 +1,5 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function(mod) {
+var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -23,6 +23,6 @@ server.app.use('/multimedia', multimedia_1.default);
 server.app.use('/nota', nota_1.default);
 // MySQL get instance 
 // MySQL.instance;
-server.start(function() {
-    console.log('Servidor corriendo en el puerto 3000');
+server.start(function () {
+    console.log("Servidor corriendo en el puerto " + process.env.PORT + "s");
 });

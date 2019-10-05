@@ -6,7 +6,6 @@ import notas from './router/nota';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { SERVER_PORT } from '../global/enviroments';
 
 const server = Server.instance;
 
@@ -29,6 +28,6 @@ server.app.use('/nota', notas);
 // MySQL.instance;
 
 server.start(() => {
-    console.log(`Servidor corriendo en el puerto ${SERVER_PORT}`);
+    console.log(`Servidor corriendo en el puerto ${process.env.PORT}s`);
 });
 
