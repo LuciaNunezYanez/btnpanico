@@ -9,7 +9,7 @@ var socket_io_1 = __importDefault(require("socket.io"));
 var http_1 = __importDefault(require("http"));
 var Server = /** @class */ (function () {
     function Server() {
-        this.port = Number(process.env.PORT) || 3000;
+        this.port = process.env.PORT || 3000;
         this.app = express();
         // Inicializar conf de sockets 
         this.httpServer = new http_1.default.Server(this.app);

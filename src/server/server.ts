@@ -7,12 +7,12 @@ export default class Server{
     private static _instance: Server;
     
     public app: express.Application;
-    public port: number;
+    public port: any;
     public io: socketIO.Server;
     public httpServer: http.Server;
 
     private constructor(){
-        this.port = Number(process.env.PORT) || 3000;
+        this.port = process.env.PORT || 3000;
         this.app = express();
         
         // Inicializar conf de sockets 

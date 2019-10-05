@@ -28,6 +28,6 @@ server.app.use('/nota', notas);
 // MySQL.instance;
 
 server.start(() => {
-    console.log(`Servidor corriendo en el puerto ${process.env.PORT}s`);
+    console.log(`Servidor corriendo en el puerto ${server.port}`);
 });
 

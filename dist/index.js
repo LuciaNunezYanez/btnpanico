@@ -24,5 +24,5 @@ server.app.use('/nota', nota_1.default);
 // MySQL get instance 
 // MySQL.instance;
 server.start(function () {
-    console.log("Servidor corriendo en el puerto " + process.env.PORT + "s");
+    console.log("Servidor corriendo en el puerto " + server.port);
 });
