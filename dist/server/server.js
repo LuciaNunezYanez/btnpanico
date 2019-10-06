@@ -32,8 +32,12 @@ var Server = /** @class */ (function () {
     };
     Server.prototype.escucharSockets = function () {
         console.log('Escuchando conexiones - SOCKETS ');
-        this.io.on('connection', function (cliente) {
+        this.io.on('connection', function (socket) {
             console.log('Nuevo cliente conectado a traves de sockets');
+            socket.on('panico', function () {
+                console.log("Nueva alerta de pánico");
+                socket.broadcast.emit('recibido');
+            });
         });
     };
     Server.prototype.start = function (callback) {

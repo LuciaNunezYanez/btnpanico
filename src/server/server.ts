@@ -37,9 +37,14 @@ export default class Server{
 
     private escucharSockets(){
         console.log('Escuchando conexiones - SOCKETS ');
-
-        this.io.on('connection', cliente =>{
+        
+        this.io.on('connection', socket =>{
             console.log('Nuevo cliente conectado a traves de sockets');
+
+            socket.on('panico', ()=>{
+                console.log("Nueva alerta de pánico");
+                socket.broadcast.emit('recibido');
+            });
         });
     }
 
