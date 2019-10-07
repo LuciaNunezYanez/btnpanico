@@ -42,7 +42,7 @@ export default class Server{
         console.log('Escuchando conexiones - SOCKETS ');
 
         // Escuchas conexion con sockets
-        this.io.on('connection', socket =>{
+        this.io.on('connection', (socket) =>{
             console.log('Nuevo cliente conectado a traves de sockets');
 
             // Emitir eventos a los clientes
