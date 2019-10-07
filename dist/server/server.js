@@ -43,7 +43,7 @@ var Server = /** @class */ (function () {
             socket.on('panico', function (comercio) {
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
             });
-            socket.broadcast.emit('recibido', respuesta);
+            //socket.broadcast.emit('recibido', respuesta);
             _this.io.emit('recibido', respuesta);
         });
     };
