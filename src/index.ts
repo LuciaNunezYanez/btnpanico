@@ -4,6 +4,8 @@ import reporte from './router/reporte';
 import multimedia from './router/multimedia';
 import notas from './router/nota';
 
+import alertas from './router/alertas';
+
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
@@ -22,6 +24,7 @@ server.app.use('/comercio', comercios);
 server.app.use('/reporte', reporte);
 server.app.use('/multimedia', multimedia);
 server.app.use('/nota', notas);
+server.app.use('/alertas', alertas);
 
 
 // MySQL get instance 

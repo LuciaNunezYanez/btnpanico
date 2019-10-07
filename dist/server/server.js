@@ -29,14 +29,18 @@ var Server = /** @class */ (function () {
     Server.prototype.publicFolder = function () {
         var publicPath = path.resolve(__dirname, '../public');
         this.app.use(express.static(publicPath));
+        //Express HBS
+        this.app.set('view engine', 'hbs');
     };
     Server.prototype.escucharSockets = function () {
         console.log('Escuchando conexiones - SOCKETS ');
+        // Escuchas conexion con sockets
         this.io.on('connection', function (socket) {
             console.log('Nuevo cliente conectado a traves de sockets');
-            socket.on('panico', function () {
+            // Emitir eventos a los clientes
+            socket.on('panico', function (message) {
                 console.log("Nueva alerta de pánico");
-                socket.broadcast.emit('recibido');
+                socket.broadcast.emit('recibido', message);
             });
         });
     };

@@ -8,6 +8,7 @@ var comercio_1 = __importDefault(require("./router/comercio"));
 var reporte_1 = __importDefault(require("./router/reporte"));
 var multimedia_1 = __importDefault(require("./router/multimedia"));
 var nota_1 = __importDefault(require("./router/nota"));
+var alertas_1 = __importDefault(require("./router/alertas"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var cors_1 = __importDefault(require("cors"));
 var server = server_1.default.instance;
@@ -21,6 +22,7 @@ server.app.use('/comercio', comercio_1.default);
 server.app.use('/reporte', reporte_1.default);
 server.app.use('/multimedia', multimedia_1.default);
 server.app.use('/nota', nota_1.default);
+server.app.use('/alertas', alertas_1.default);
 // MySQL get instance 
 // MySQL.instance;
 server.start(function () {
