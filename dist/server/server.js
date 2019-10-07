@@ -38,17 +38,11 @@ var Server = /** @class */ (function () {
         this.io.on('connection', function (socket) {
             console.log('Nuevo cliente conectado a traves de sockets');
             var respuesta = "Se ha recibido tu alerta";
-            // E V E N T O S
-            socket.on('panico', function (comercio) {
+            // E V E N T O - B O T O N - A C T I V A D O 
+            socket.on('botonActivado', function (comercio) {
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
-                socket.emit('recibido', respuesta);
-                //this.io.emit('recibido', respuesta);
+                socket.emit('alertaRecibida', respuesta);
             });
-            // ENVIA PERO NO RECIBE 
-            // Envia a todos excepto a un quien envio la alerta
-            //socket.broadcast.emit('recibido', respuesta);
-            // Server a uno 
-            // ENVIA Y RECIBE 
             // Envia la alerta a TODOS 
             // this.io.emit('recibido', respuesta);
         });
