@@ -54,6 +54,7 @@ export default class Server{
 
                 socket.on('datosComercio', function(codigoComercio){
                     socket.emit('alertaRecibida', `Se recibieron los datos del comercio ${codigoComercio}` )
+                    socket.off;
                 });
             });
 

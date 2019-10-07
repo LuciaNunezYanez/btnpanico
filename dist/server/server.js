@@ -44,6 +44,7 @@ var Server = /** @class */ (function () {
                 socket.emit('alertaRecibida', respuesta);
                 socket.on('datosComercio', function (codigoComercio) {
                     socket.emit('alertaRecibida', "Se recibieron los datos del comercio " + codigoComercio);
+                    socket.off;
                 });
             });
             // Envia la alerta a TODOS 
