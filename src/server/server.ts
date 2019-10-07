@@ -46,7 +46,7 @@ export default class Server{
             console.log('Nuevo cliente conectado a traves de sockets');
 
             // Emitir eventos a los clientes
-            socket.on('panico', (message)=>{
+            socket.on('panico', function(message){
                 console.log("Nueva alerta de pánico");
                 
                 const respuesta = {
