@@ -42,6 +42,9 @@ var Server = /** @class */ (function () {
             socket.on('botonActivado', function (comercio) {
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
                 socket.emit('alertaRecibida', respuesta);
+                socket.on('datosComercio', function (codigoComercio) {
+                    socket.emit('alertaRecibida', "Se recibieron los datos del comercio " + codigoComercio);
+                });
             });
             // Envia la alerta a TODOS 
             // this.io.emit('recibido', respuesta);
