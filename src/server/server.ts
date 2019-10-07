@@ -44,14 +44,16 @@ export default class Server{
         // Escuchas conexion con sockets
         this.io.on('connection', (socket) =>{
             console.log('Nuevo cliente conectado a traves de sockets');
-
+            const respuesta = "Se ha recibido tu alerta";
+            
             // E V E N T O S
             socket.on('panico', function(comercio){
+                
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
                 
-                const respuesta = "Se ha recibido tu alerta";
-                socket.broadcast.emit('recibido', respuesta);
             });
+            socket.broadcast.emit('recibido', respuesta);
+            this.io.emit('recibido', respuesta);
         });
     }
 
