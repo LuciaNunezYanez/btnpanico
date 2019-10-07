@@ -33,6 +33,7 @@ var Server = /** @class */ (function () {
         this.app.set('view engine', 'hbs');
     };
     Server.prototype.escucharSockets = function () {
+        var _this = this;
         console.log('Escuchando conexiones - SOCKETS ');
         // Escuchas conexion con sockets
         this.io.on('connection', function (socket) {
@@ -42,9 +43,13 @@ var Server = /** @class */ (function () {
             socket.on('panico', function (comercio) {
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
             });
-            socket.broadcast.emit('recibido', respuesta);
-            //Con el io.emit sirve
-            //this.io.emit('recibido', respuesta);
+            // ENVIA PERO NO RECIBE 
+            // Envia a todos excepto a un quien envio la alerta
+            //socket.broadcast.emit('recibido', respuesta);
+            // Server a uno 
+            // ENVIA Y RECIBE 
+            // Envia la alerta a TODOS 
+            _this.io.emit('recibido', respuesta);
         });
     };
     Server.prototype.start = function (callback) {
