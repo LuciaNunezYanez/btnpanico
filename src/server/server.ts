@@ -50,6 +50,8 @@ export default class Server{
             socket.on('panico', function(comercio){
                 
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
+                socket.emit('recibido', respuesta);
+                //this.io.emit('recibido', respuesta);
                 
             });
             // ENVIA PERO NO RECIBE 
@@ -61,7 +63,8 @@ export default class Server{
 
             // ENVIA Y RECIBE 
             // Envia la alerta a TODOS 
-            this.io.emit('recibido', respuesta);
+            // this.io.emit('recibido', respuesta);
+            
         });
     }
 
