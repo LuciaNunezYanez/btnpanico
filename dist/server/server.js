@@ -37,12 +37,10 @@ var Server = /** @class */ (function () {
         // Escuchas conexion con sockets
         this.io.on('connection', function (socket) {
             console.log('Nuevo cliente conectado a traves de sockets');
-            // Emitir eventos a los clientes
-            socket.on('panico', function (message) {
-                console.log("Nueva alerta de pánico");
-                var respuesta = {
-                    message: "Se ha recibido tu alerta"
-                };
+            // E V E N T O S
+            socket.on('panico', function (comercio) {
+                console.log("Nueva alerta de pánico del comercio: " + comercio);
+                var respuesta = "Se ha recibido tu alerta";
                 socket.broadcast.emit('recibido', respuesta);
             });
         });
