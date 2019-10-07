@@ -40,7 +40,10 @@ var Server = /** @class */ (function () {
             // Emitir eventos a los clientes
             socket.on('panico', function (message) {
                 console.log("Nueva alerta de pánico");
-                socket.broadcast.emit('recibido', message);
+                var respuesta = {
+                    message: "Se ha recibido tu alerta"
+                };
+                socket.broadcast.emit('recibido', respuesta);
             });
         });
     };

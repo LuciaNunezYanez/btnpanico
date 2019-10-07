@@ -49,7 +49,11 @@ export default class Server{
             socket.on('panico', (message)=>{
                 console.log("Nueva alerta de pánico");
                 
-                socket.broadcast.emit('recibido', message);
+                const respuesta = {
+                    message: "Se ha recibido tu alerta"
+                };
+
+                socket.broadcast.emit('recibido', respuesta);
             });
         });
     }
