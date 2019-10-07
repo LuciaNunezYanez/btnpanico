@@ -52,8 +52,9 @@ export default class Server{
                 console.log("Nueva alerta de pánico del comercio: " + comercio);
                 
             });
-            //socket.broadcast.emit('recibido', respuesta);
-            this.io.emit('recibido', respuesta);
+            socket.broadcast.emit('recibido', respuesta);
+            //Con el io.emit sirve
+            //this.io.emit('recibido', respuesta);
         });
     }
 
