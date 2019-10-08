@@ -2,6 +2,8 @@ import express = require('express');
 import path = require('path');
 import socketIO from 'socket.io';
 import http from 'http';
+import * as socket from '../sockets/sockets';    
+import { desconectar } from '../sockets/sockets';
 
 export default class Server{
     private static _instance: Server;
@@ -15,13 +17,14 @@ export default class Server{
         this.port = process.env.PORT || 3000;
         this.app = express();
         
-        // Inicializar conf de sockets 
+        // Inicializar configuración de sockets 
         this.httpServer = new http.Server( this.app );
         this.io = socketIO(this.httpServer);
         
         this.escucharSockets();
     }
 
+    // Evita la declaración de varias instancias 
     public static get instance() {
         return this._instance || (this._instance = new this());
     }
@@ -42,27 +45,13 @@ export default class Server{
         console.log('Escuchando conexiones - SOCKETS ');
 
         // Escuchas conexion con sockets
-        this.io.on('connection', (socket) =>{
-            console.log('Nuevo cliente conectado a traves de sockets');
-            const respuesta = "Se ha recibido tu alerta";
+        this.io.on('connection', (cliente) =>{
             
-            // E V E N T O - B O T O N - A C T I V A D O 
-            socket.on('botonActivado', function(comercio){
-                console.log("Nueva alerta de pánico del comercio: " + comercio);
-                socket.emit('alertaRecibida', respuesta);
-
-
-                socket.on('datosComercio', function(codigoComercio){
-                    socket.emit('alertaRecibida', `Se recibieron los datos del comercio ${codigoComercio}` )
-                    socket.off;
-                });
-            });
-
-
-
-
-            // Envia la alerta a TODOS 
-            // this.io.emit('recibido', respuesta);
+            // Escuchar cuando un cliente se conecto
+            socket.connectado(cliente);
+            
+            // Escuchar cuando un cliente se desconecto 
+            socket.desconectar(cliente);
             
         });
     }
