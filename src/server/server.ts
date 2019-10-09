@@ -3,7 +3,6 @@ import path = require('path');
 import socketIO from 'socket.io';
 import http from 'http';
 import * as socket from '../sockets/sockets';    
-import { desconectar } from '../sockets/sockets';
 
 export default class Server{
     private static _instance: Server;
@@ -47,11 +46,14 @@ export default class Server{
         // Escuchas conexion con sockets
         this.io.on('connection', (cliente) =>{
             
+            // Escuchar los mensajes que se reciben del servidor
+            socket.mensaje(cliente);
+            
             // Escuchar cuando un cliente se conecto
-            socket.connectado(cliente);
+            socket.CONECTADO(cliente);
             
             // Escuchar cuando un cliente se desconecto 
-            socket.desconectar(cliente);
+            socket.DESCONECTADO(cliente);
             
         });
     }

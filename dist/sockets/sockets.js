@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectado = function (cliente) {
+exports.CONECTADO = function (cliente) {
     console.log("CLIENTE CONECTADO");
     // E V E N T O - B O T O N - A C T I V A D O 
     cliente.on('botonActivado', function (comercio) {
@@ -16,8 +16,15 @@ exports.connectado = function (cliente) {
 };
 // Envia la alerta a TODOS 
 // this.io.emit('recibido', respuesta);
-exports.desconectar = function (cliente) {
+exports.DESCONECTADO = function (cliente) {
     cliente.on('disconnect', function () {
         console.log('CLIENTE DESCONECTADO');
+    });
+};
+// Escuchar mensaje de tipo sockeT
+exports.mensaje = function (cliente) {
+    cliente.on('mensaje', function (payload) {
+        console.log('RECIBIENDO  MENSAJE');
+        console.log(payload);
     });
 };

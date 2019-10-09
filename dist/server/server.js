@@ -45,10 +45,12 @@ var Server = /** @class */ (function () {
         console.log('Escuchando conexiones - SOCKETS ');
         // Escuchas conexion con sockets
         this.io.on('connection', function (cliente) {
+            // Escuchar los mensajes que se reciben del servidor
+            socket.mensaje(cliente);
             // Escuchar cuando un cliente se conecto
-            socket.connectado(cliente);
+            socket.CONECTADO(cliente);
             // Escuchar cuando un cliente se desconecto 
-            socket.desconectar(cliente);
+            socket.DESCONECTADO(cliente);
         });
     };
     Server.prototype.start = function (callback) {

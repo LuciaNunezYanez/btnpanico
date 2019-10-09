@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 
-export const connectado = (cliente: Socket) => {
+export const CONECTADO = (cliente: Socket) => {
 
     console.log("CLIENTE CONECTADO");
 
@@ -25,10 +25,20 @@ export const connectado = (cliente: Socket) => {
     // this.io.emit('recibido', respuesta);
 
 
-export const desconectar = (cliente: Socket) => {
+export const DESCONECTADO = (cliente: Socket) => {
     
     cliente.on('disconnect', () =>{
         console.log('CLIENTE DESCONECTADO');
     });
     
+}
+
+// Escuchar mensaje de tipo sockeT
+export const mensaje = (cliente: Socket) => {
+    cliente.on('mensaje', (payload) => {
+        console.log('RECIBIENDO  MENSAJE');
+        console.log(payload);
+    
+
+    });
 }
