@@ -35,13 +35,13 @@ router.post('/', function (req, res) {
     var query = "CALL addMultimediaRtID(\n                    " + fhCapturada + ",\n                    " + tipoArchivo + ",\n                    " + ruta + ",\n                    " + idReporte + ",\n                    @last_id);";
     mysql_1.default.ejecutarQuery(query, function (err, id) {
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 error: err
             });
         }
         else {
-            res.json({
+            return res.json({
                 ok: true,
                 id: id[0][0].last_id
             });

@@ -11,13 +11,13 @@ router.get('/', function (req, res) {
     var query = " SELECT * FROM comercio; ";
     mysql_1.default.ejecutarQuery(query, function (err, comercios) {
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 error: err
             });
         }
         else {
-            res.json({
+            return res.json({
                 ok: true,
                 comercios: comercios
             });
@@ -32,13 +32,13 @@ router.get('/:id', function (req, res) {
     var query = "CALL getComercioID(" + escapedId + ")";
     mysql_1.default.ejecutarQuery(query, function (err, comercio) {
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 error: err
             });
         }
         else {
-            res.json({
+            return res.json({
                 ok: true,
                 comercio: comercio[0]
             });

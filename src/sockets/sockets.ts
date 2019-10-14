@@ -4,17 +4,31 @@ export const CONECTADO = (cliente: Socket) => {
 
     console.log("CLIENTE CONECTADO");
 
+    // USUARIO CONECTADO DEL NIT 
+    cliente.on('personaLogeada', (usuario) => {
+        console.log('Usuario conectado del NIT:', usuario);
+    })
+
+
+
     // E V E N T O - B O T O N - A C T I V A D O 
-    cliente.on('botonActivado', function(comercio){
-        const respuesta = "Se ha recibido tu alerta";
-        console.log("Nueva alerta de pánico del comercio: " + comercio);                
-        cliente.emit('alertaRecibida', respuesta);
+    cliente.on('botonActivado', function(codigoComercio){
+        const COD_COMERCIO = codigoComercio;
+
+        // Se recibe el codigo de comercio para traer los datos de la BASE DE DATOS
+        // Despues de traerlos se emiten a ANGULAR
+        console.log(`Nueva alerta de pánico del comercio: ${COD_COMERCIO}`);               
+        cliente.emit('alertaRecibida', 'Se ha recibido tu alerta');
+
+        // Se debe enviar la alerta a todos los clientes de ANGULAR
+    
     });
                 
     
     cliente.on('datosComercio', function(codigoComercio){
         // Se recibe el codigo del comercio
         // Se genera alerta en el dashboard 
+
     });
     
     cliente.on('fotografias', Object);
@@ -40,5 +54,11 @@ export const mensaje = (cliente: Socket) => {
         console.log(payload);
     
 
+    });
+}
+
+export const alertaComercio = (cliente: Socket) =>{
+    cliente.on('botonActivado', () =>{
+        
     });
 }

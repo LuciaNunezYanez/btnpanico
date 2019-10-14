@@ -16,12 +16,12 @@ router.get('/:id', (req: Request, res: Response) => {
         const obj = reporte[0];
 
         if(err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false, 
                 error: err
             });
         } else {
-            res.json({
+            return res.json({
                 ok: true,
                 reporte: obj
             });
@@ -60,12 +60,12 @@ router.post('/', (req: Request, res: Response) => {
 
         MySQL.ejecutarQuery( query, (err: any, id:any[][]) => {
             if(err) {
-                res.status(400).json({
+                return res.status(400).json({
                     ok: false, 
                     error: err
                 });
             } else {
-                res.json({
+                return res.json({
                     ok: true,
                     id: id[0][0].last_id
                 });

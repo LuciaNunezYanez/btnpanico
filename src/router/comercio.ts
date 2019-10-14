@@ -10,12 +10,12 @@ router.get('/' , (req: Request, res: Response) =>{
 
     MySQL.ejecutarQuery( query, (err: any, comercios: Object[]) => {
         if(err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false, 
                 error: err
             });
         } else {
-            res.json({
+            return res.json({
                 ok: true,
                 comercios
             });
@@ -35,12 +35,12 @@ router.get('/:id' , (req: Request, res: Response) =>{
 
     MySQL.ejecutarQuery( query, (err: any, comercio: Object[]) => {
         if(err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false, 
                 error: err
             });
         } else {
-            res.json({
+            return res.json({
                 ok: true,
                 comercio: comercio[0]
             });

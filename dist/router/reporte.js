@@ -14,13 +14,13 @@ router.get('/:id', function (req, res) {
     mysql_1.default.ejecutarQuery(query, function (err, reporte) {
         var obj = reporte[0];
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 error: err
             });
         }
         else {
-            res.json({
+            return res.json({
                 ok: true,
                 reporte: obj
             });
@@ -43,13 +43,13 @@ router.post('/', function (req, res) {
     var query = "CALL addReporteRtID(\n                    " + idUserCc + ",\n                    " + idComercReporte + ",\n                    " + idUserApp + ",\n                    " + idUnidad + ",\n                    " + fhDoc + ",\n                    " + fhAtaque + ",\n                    " + tipoInc + ",\n                    " + descripEmerg + ",\n                    " + clasifEmerg + ",\n                    " + estatusActual + ",\n                    " + cierreConcl + ",\n                    @last_id);";
     mysql_1.default.ejecutarQuery(query, function (err, id) {
         if (err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 error: err
             });
         }
         else {
-            res.json({
+            return res.json({
                 ok: true,
                 id: id[0][0].last_id
             });
