@@ -1,25 +1,23 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
-
+const { verificaToken } = require('../server/middlewares/autenticacion');
 const router = Router();
 
 
 // Obtener archivos multimedia por ID 
 router.get('/:id' , (req: Request, res: Response) =>{
-
     const id = req.params.id;
     const escapedId = MySQL.instance.cnn.escape( id );
-
     const query = `CALL getMultimedID(${escapedId})`;
 
     MySQL.ejecutarQuery( query, (err: any, multimedia: Object[]) => {
         if(err) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false, 
                 error: err
             });
         } else {
-            res.json({
+            return res.json({
                 ok: true,
                 multimedia: multimedia[0]
             });
@@ -30,7 +28,6 @@ router.get('/:id' , (req: Request, res: Response) =>{
 
 // Agregar archivos multimedia 
 router.post('/', (req: Request, res: Response) => {
-    
     const fhCapturada: string = MySQL.instance.cnn.escape(req.body.fh_captura);
     const tipoArchivo: string = MySQL.instance.cnn.escape(req.body.tipo_archivo);
     const ruta: string = MySQL.instance.cnn.escape(req.body.ruta);

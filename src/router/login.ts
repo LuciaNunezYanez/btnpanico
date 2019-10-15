@@ -1,13 +1,13 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
+// import * from '../server/globals';
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const router = Router();
-
-let salt = bcrypt.genSaltSync(10);
 
 // Log in
 router.post('/', (req: Request, res: Response) => {
-    
+
     const usuario = MySQL.instance.cnn.escape(req.body.usuario);
     const passNoEnctrip = req.body.contrasenia;
     const query = `CALL getUsuarioCCID(${usuario})`;
@@ -20,17 +20,42 @@ router.post('/', (req: Request, res: Response) => {
                     resp: err
                 })
             } else {
+                //GENERAR TOKEN
+                let { 
+                    id_usuarios_cc,
+                    nombres_usuarios_cc , 
+                    apellido_paterno, 
+                    apellido_materno, 
+                    tipo_usuario, 
+                    dependencia, 
+                    sexo_cc, 
+                    estatus_usuario } = data[0][0];
+                const usuario = {
+                    id_usuario: id_usuarios_cc,
+                    nombres: nombres_usuarios_cc , 
+                    epellPat: apellido_paterno, 
+                    apellMat: apellido_materno, 
+                    tipo: tipo_usuario, 
+                    depend: dependencia, 
+                    sexo: sexo_cc, 
+                    estatus: estatus_usuario};
+                let token = jwt.sign({
+                    usuario: usuario
+                }, process.env.SEED || 'este-es-el-seed-de-desarrollo', 
+                { expiresIn: 60 * 60 * 24 });
+                
+                // VALIDAR INICIO DE SESIÓN 
                 const passEncript = data[0][0].contrasena;
- 
                 if(bcrypt.compareSync(passNoEnctrip, passEncript)){
                     return res.json({
                         ok: true, 
                         resp: 'Contraseña exitosa', 
-                        data: data[0][0]
+                        //usuario: { usuario },
+                        token
                     });
                 }else{
                     return res.json({
-                        ok: true ,
+                        ok: false,
                         resp: 'Contraseña incorrecta'
                     });
                 } 

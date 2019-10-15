@@ -1,22 +1,21 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
+import { verify } from 'crypto';
+const { verificaToken } = require('../server/middlewares/autenticacion');
 const bcrypt = require('bcrypt');
 const router = Router();
-
 let salt = bcrypt.genSaltSync(10);
 
 // Obtener usuario por usuario
-router.get('/:id', ( req: Request, res: Response ) =>{
-
+router.get('/:id', verificaToken, ( req: Request, res: Response ) =>{
     const idusuario = MySQL.instance.cnn.escape(req.params.id);
-
     const query = `CALL getUsuarioCCID(${idusuario})`;
 
     MySQL.ejecutarQuery(query, (err: any, data: any[][]) => {
         if( err ){
             return res.status(400).json({
                 ok: false, 
-                resp: err
+                resp: err 
             })
         } else {
             return res.json({
@@ -30,7 +29,7 @@ router.get('/:id', ( req: Request, res: Response ) =>{
 });
 
 // Agregar usuarios NIT
-router.post('/',(req: Request, res: Response) => {
+router.post('/',verificaToken, (req: Request, res: Response) => {
      
     // Encriptar contraseña FORMA 1 
     let contrasena: string = ( req.body.contrasena);
@@ -63,7 +62,7 @@ router.post('/',(req: Request, res: Response) => {
         if(err){
             return res.status(400).json({
                 ok: false,
-                err: err
+                resp: err
             });
         } else {
             return res.json({
@@ -78,7 +77,7 @@ router.post('/',(req: Request, res: Response) => {
 
 
 // Editar usuario NIT 
-router.put('/:id', (req: Request, res: Response) => {
+router.put('/:id', verificaToken, (req: Request, res: Response) => {
     let usuario = MySQL.instance.cnn.escape(req.params.id);
     let body = req.body;    
 

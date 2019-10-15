@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
+var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var router = express_1.Router();
-router.get('/:id', function (req, res) {
+router.get('/:id', verificaToken, function (req, res) {
+    // return res.json({usuario: req.usuario});
     var id = req.params.id;
-    // Escapar ID 
     var escapedId = mysql_1.default.instance.cnn.escape(id);
     var query = "CALL getReporteID(" + escapedId + ")";
     mysql_1.default.ejecutarQuery(query, function (err, reporte) {
@@ -27,7 +28,7 @@ router.get('/:id', function (req, res) {
         }
     });
 });
-router.post('/', function (req, res) {
+router.post('/', verificaToken, function (req, res) {
     // Recibir datos p t reporte
     var idUserCc = req.body.id_user_cc || 1; // 1 = Sin atender
     var idComercReporte = req.body.id_comerc;

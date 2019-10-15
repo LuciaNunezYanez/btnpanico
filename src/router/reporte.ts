@@ -1,20 +1,17 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
+const { verificaToken } = require('../server/middlewares/autenticacion');
 const router = Router();
 
-router.get('/:id', (req: Request, res: Response) => {
-    
+router.get('/:id', verificaToken, (req: Request, res: Response) => {
+    // return res.json({usuario: req.usuario});
+
     const id = req.params.id;
-
-    // Escapar ID 
     const escapedId = MySQL.instance.cnn.escape( id );
-
     const query = `CALL getReporteID(${escapedId})`;
 
     MySQL.ejecutarQuery( query, (err: any, reporte: Object[]) => {
-        
         const obj = reporte[0];
-
         if(err) {
             return res.status(400).json({
                 ok: false, 
@@ -29,7 +26,8 @@ router.get('/:id', (req: Request, res: Response) => {
     });
 });
 
-router.post('/', (req: Request, res: Response) => {
+
+router.post('/', verificaToken, (req: Request, res: Response) => {
 
     // Recibir datos p t reporte
     const idUserCc: number = req.body.id_user_cc || 1; // 1 = Sin atender
@@ -71,7 +69,6 @@ router.post('/', (req: Request, res: Response) => {
                 });
             }
         });
-
 });
 
 export default router;
