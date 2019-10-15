@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt');
 const router = Router();
 
 let salt = bcrypt.genSaltSync(10);
@@ -34,7 +34,9 @@ router.post('/',(req: Request, res: Response) => {
      
     // Encriptar contraseña FORMA 1 
     let contrasena: string = ( req.body.contrasena);
-    const contrEncript = MySQL.instance.cnn.escape(bcrypt.hashSync(contrasena, salt));
+    // Quizá quitando el escape
+    let contrEncript = bcrypt.hashSync(contrasena, salt);
+    contrEncript = MySQL.instance.cnn.escape(contrEncript);
 
     let nombre: string = MySQL.instance.cnn.escape(req.body.nombre);
     let apePat: string = MySQL.instance.cnn.escape(req.body.apePat);

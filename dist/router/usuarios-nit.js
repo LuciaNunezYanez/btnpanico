@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-var bcrypt = require('bcrypt-nodejs');
+var bcrypt = require('bcrypt');
 var router = express_1.Router();
 var salt = bcrypt.genSaltSync(10);
 // Obtener usuario por usuario
@@ -31,7 +31,9 @@ router.get('/:id', function (req, res) {
 router.post('/', function (req, res) {
     // Encriptar contraseña FORMA 1 
     var contrasena = (req.body.contrasena);
-    var contrEncript = mysql_1.default.instance.cnn.escape(bcrypt.hashSync(contrasena, salt));
+    // Quizá quitando el escape
+    var contrEncript = bcrypt.hashSync(contrasena, salt);
+    contrEncript = mysql_1.default.instance.cnn.escape(contrEncript);
     var nombre = mysql_1.default.instance.cnn.escape(req.body.nombre);
     var apePat = mysql_1.default.instance.cnn.escape(req.body.apePat);
     var apeMat = mysql_1.default.instance.cnn.escape(req.body.apeMat) || '';
