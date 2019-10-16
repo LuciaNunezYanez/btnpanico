@@ -5,15 +5,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
+var _a = require('../server/middlewares/autenticacion'), verificaToken = _a.verificaToken, verificaAdmin_role = _a.verificaAdmin_role;
 var bcrypt = require('bcrypt');
 var router = express_1.Router();
 var salt = bcrypt.genSaltSync(10);
 // Obtener usuario por usuario
-router.get('/:id', verificaToken, function (req, res) {
+router.get('/:id', [verificaToken, verificaAdmin_role], function (req, res) {
     var idusuario = mysql_1.default.instance.cnn.escape(req.params.id);
     var query = "CALL getUsuarioCCID(" + idusuario + ")";
-    mysql_1.default.ejecutarQuery(query, function (err, data) {
+    mysql_1.default.ejecutarQuery(query, function (err, usuario) {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -23,13 +23,13 @@ router.get('/:id', verificaToken, function (req, res) {
         else {
             return res.json({
                 ok: true,
-                resp: data[0][0]
+                resp: usuario[0][0]
             });
         }
     });
 });
 // Agregar usuarios NIT
-router.post('/', verificaToken, function (req, res) {
+router.post('/', [verificaToken, verificaAdmin_role], function (req, res) {
     // Encriptar contraseña FORMA 1 
     var contrasena = (req.body.contrasena);
     // Quizá quitando el escape
@@ -54,13 +54,13 @@ router.post('/', verificaToken, function (req, res) {
         else {
             return res.json({
                 ok: true,
-                usuario: req.body.usuario
+                resp: req.body.usuario
             });
         }
     });
 });
 // Editar usuario NIT 
-router.put('/:id', verificaToken, function (req, res) {
+router.put('/:id', [verificaToken, verificaAdmin_role], function (req, res) {
     var usuario = mysql_1.default.instance.cnn.escape(req.params.id);
     var body = req.body;
     var nombre = mysql_1.default.instance.cnn.escape(body.nombre);
@@ -74,17 +74,17 @@ router.put('/:id', verificaToken, function (req, res) {
     var contrasena = body.contrasena;
     var contrEncript = mysql_1.default.instance.cnn.escape(bcrypt.hashSync(contrasena, salt));
     var QUERY = "CALL editUsuarioCCID(\n        " + nombre + ",\n        " + apePat + ",\n        " + apeMat + ",\n        " + contrEncript + ",\n        " + tipoUsuario + ",\n        " + depend + ",\n        " + sexo + ",\n        " + estatus + ",\n        " + usuario + ");";
-    mysql_1.default.ejecutarQuery(QUERY, function (err, data) {
+    mysql_1.default.ejecutarQuery(QUERY, function (err, usuario) {
         if (err) {
             return res.status(400).json({
                 ok: false,
-                err: err
+                resp: err
             });
         }
         else {
             return res.json({
                 ok: true,
-                data: data[0][0]
+                resp: usuario[0][0]
             });
         }
     });

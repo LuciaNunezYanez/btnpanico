@@ -1,17 +1,17 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
 import { verify } from 'crypto';
-const { verificaToken } = require('../server/middlewares/autenticacion');
+const { verificaToken, verificaAdmin_role } = require('../server/middlewares/autenticacion');
 const bcrypt = require('bcrypt');
 const router = Router();
 let salt = bcrypt.genSaltSync(10);
 
 // Obtener usuario por usuario
-router.get('/:id', verificaToken, ( req: Request, res: Response ) =>{
+router.get('/:id', [verificaToken, verificaAdmin_role], ( req: Request, res: Response ) =>{
     const idusuario = MySQL.instance.cnn.escape(req.params.id);
     const query = `CALL getUsuarioCCID(${idusuario})`;
 
-    MySQL.ejecutarQuery(query, (err: any, data: any[][]) => {
+    MySQL.ejecutarQuery(query, (err: any, usuario: any[][]) => {
         if( err ){
             return res.status(400).json({
                 ok: false, 
@@ -20,7 +20,7 @@ router.get('/:id', verificaToken, ( req: Request, res: Response ) =>{
         } else {
             return res.json({
                 ok: true, 
-                resp: data[0][0]
+                resp: usuario[0][0]
             })
 
         }
@@ -29,7 +29,7 @@ router.get('/:id', verificaToken, ( req: Request, res: Response ) =>{
 });
 
 // Agregar usuarios NIT
-router.post('/',verificaToken, (req: Request, res: Response) => {
+router.post('/',[verificaToken, verificaAdmin_role], (req: Request, res: Response) => {
      
     // Encriptar contraseña FORMA 1 
     let contrasena: string = ( req.body.contrasena);
@@ -67,7 +67,7 @@ router.post('/',verificaToken, (req: Request, res: Response) => {
         } else {
             return res.json({
                 ok: true,
-                usuario: req.body.usuario
+                resp: req.body.usuario
             });
         }
 
@@ -77,7 +77,7 @@ router.post('/',verificaToken, (req: Request, res: Response) => {
 
 
 // Editar usuario NIT 
-router.put('/:id', verificaToken, (req: Request, res: Response) => {
+router.put('/:id', [verificaToken, verificaAdmin_role], (req: Request, res: Response) => {
     let usuario = MySQL.instance.cnn.escape(req.params.id);
     let body = req.body;    
 
@@ -105,16 +105,16 @@ router.put('/:id', verificaToken, (req: Request, res: Response) => {
         ${estatus},
         ${usuario});`;
 
-    MySQL.ejecutarQuery(QUERY, (err: any, data: any [][]) => {
+    MySQL.ejecutarQuery(QUERY, (err: any, usuario: any [][]) => {
         if(err){
             return res.status(400).json({
                 ok: false, 
-                err
+                resp: err
             });
         } else {
             return res.json({
                 ok: true, 
-                data: data[0][0]
+                resp: usuario[0][0]
             });
         }
     })

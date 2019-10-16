@@ -23,8 +23,14 @@ router.post('/', function (req, res) {
                 });
             }
             else {
-                //GENERAR TOKEN
                 var _a = data[0][0], id_usuarios_cc = _a.id_usuarios_cc, nombres_usuarios_cc = _a.nombres_usuarios_cc, apellido_paterno = _a.apellido_paterno, apellido_materno = _a.apellido_materno, tipo_usuario = _a.tipo_usuario, dependencia = _a.dependencia, sexo_cc = _a.sexo_cc, estatus_usuario = _a.estatus_usuario;
+                // VALIDAR USUARIO ACTIVO 
+                if (estatus_usuario === 0) {
+                    return res.json({
+                        ok: false,
+                        resp: 'Usuario inactivo'
+                    });
+                }
                 var usuario_1 = {
                     id_usuario: id_usuarios_cc,
                     nombres: nombres_usuarios_cc,
@@ -35,6 +41,7 @@ router.post('/', function (req, res) {
                     sexo: sexo_cc,
                     estatus: estatus_usuario
                 };
+                //GENERAR TOKEN
                 var token = jwt.sign({
                     usuario: usuario_1
                 }, process.env.SEED || 'este-es-el-seed-de-desarrollo', { expiresIn: 60 * 60 * 24 });

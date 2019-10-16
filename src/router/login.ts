@@ -20,7 +20,6 @@ router.post('/', (req: Request, res: Response) => {
                     resp: err
                 })
             } else {
-                //GENERAR TOKEN
                 let { 
                     id_usuarios_cc,
                     nombres_usuarios_cc , 
@@ -30,6 +29,14 @@ router.post('/', (req: Request, res: Response) => {
                     dependencia, 
                     sexo_cc, 
                     estatus_usuario } = data[0][0];
+                    
+                // VALIDAR USUARIO ACTIVO 
+                if(estatus_usuario === 0 ){
+                    return res.json({
+                        ok: false, 
+                        resp: 'Usuario inactivo'
+                    });
+                }
                 const usuario = {
                     id_usuario: id_usuarios_cc,
                     nombres: nombres_usuarios_cc , 
@@ -39,6 +46,8 @@ router.post('/', (req: Request, res: Response) => {
                     depend: dependencia, 
                     sexo: sexo_cc, 
                     estatus: estatus_usuario};
+
+                //GENERAR TOKEN
                 let token = jwt.sign({
                     usuario: usuario
                 }, process.env.SEED || 'este-es-el-seed-de-desarrollo', 
