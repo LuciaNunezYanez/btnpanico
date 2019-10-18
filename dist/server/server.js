@@ -43,7 +43,7 @@ var Server = /** @class */ (function () {
     };
     Server.prototype.escucharSockets = function () {
         console.log('Escuchando conexiones - SOCKETS ');
-        // Escuchas conexion con sockets
+        // Escuchar conexion con sockets
         this.io.on('connection', function (cliente) {
             // Escuchar los mensajes que se reciben del servidor
             socket.mensaje(cliente);

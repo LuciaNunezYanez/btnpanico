@@ -29,7 +29,8 @@ router.get('/:id', [verificaToken, verificaAdmin_role], ( req: Request, res: Res
 });
 
 // Agregar usuarios NIT
-router.post('/',[verificaToken, verificaAdmin_role], (req: Request, res: Response) => {
+// [verificaToken, verificaAdmin_role], 
+router.post('/',(req: Request, res: Response) => {
      
     // Encriptar contraseña FORMA 1 
     let contrasena: string = ( req.body.contrasena);
@@ -40,7 +41,7 @@ router.post('/',[verificaToken, verificaAdmin_role], (req: Request, res: Respons
     let nombre: string = MySQL.instance.cnn.escape(req.body.nombre);
     let apePat: string = MySQL.instance.cnn.escape(req.body.apePat);
     let apeMat: string = MySQL.instance.cnn.escape(req.body.apeMat) || '';
-    let usuario: string = MySQL.instance.cnn.escape(req.body.usuario);
+    let usuario: string = MySQL.instance.cnn.escape(req.body.id);
     let tipoUsuario: number = req.body.tipo;
     let depend: string = MySQL.instance.cnn.escape(req.body.depend);
     let sexo: string = MySQL.instance.cnn.escape(req.body.sexo);
@@ -67,7 +68,7 @@ router.post('/',[verificaToken, verificaAdmin_role], (req: Request, res: Respons
         } else {
             return res.json({
                 ok: true,
-                resp: req.body.usuario
+                resp: req.body.id
             });
         }
 

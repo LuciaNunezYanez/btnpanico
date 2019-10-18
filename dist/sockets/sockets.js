@@ -1,12 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var Usuarios = require('../server/classes/usuarios').Usuarios;
+var usuarios = new Usuarios();
 exports.CONECTADO = function (cliente) {
-    console.log("CLIENTE CONECTADO");
-    // USUARIO CONECTADO DEL NIT 
-    cliente.on('personaLogeada', function (usuario) {
+    console.log("-> CLIENTE CONECTADO");
+    // ==================================
+    // USUARIOS NIT
+    // ==================================
+    cliente.on('loginNIT', function (usuario, callback) {
+        // console.log('=========== USUARIO NIT CONECTADO ============');
         console.log('Usuario conectado del NIT:', usuario);
+        // Agregar el usuario a la lista de personas conectadas 
+        if (!usuario.usuario) {
+            return callback({
+                error: true,
+                mensaje: 'El usuario es necesario'
+            });
+        }
+        console.log('LOS DATOS RECIBIDOS SON: ', usuario);
+        var conectados = usuarios.agregarPersona(cliente.id, usuario.usuario, usuario.nombre, usuario.apePat, usuario.apeMat, usuario.tipo, usuario.depend, usuario.sexo, usuario.sala);
+        callback(conectados);
     });
-    // E V E N T O - B O T O N - A C T I V A D O 
+    // ==================================
+    // USUARIOS BOTON DE PANICO 
+    // ==================================
     cliente.on('botonActivado', function (codigoComercio) {
         var COD_COMERCIO = codigoComercio;
         // Se recibe el codigo de comercio para traer los datos de la BASE DE DATOS
@@ -25,10 +42,10 @@ exports.CONECTADO = function (cliente) {
 // this.io.emit('recibido', respuesta);
 exports.DESCONECTADO = function (cliente) {
     cliente.on('disconnect', function () {
-        console.log('CLIENTE DESCONECTADO');
+        console.log('<- CLIENTE DESCONECTADO');
     });
 };
-// Escuchar mensaje de tipo sockeT
+// Escuchar mensaje de tipo socket ¿De quien? 
 exports.mensaje = function (cliente) {
     cliente.on('mensaje', function (payload) {
         console.log('RECIBIENDO  MENSAJE');

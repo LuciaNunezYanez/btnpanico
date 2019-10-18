@@ -43,7 +43,7 @@ export default class Server{
     private escucharSockets(){
         console.log('Escuchando conexiones - SOCKETS ');
 
-        // Escuchas conexion con sockets
+        // Escuchar conexion con sockets
         this.io.on('connection', (cliente) =>{
             
             // Escuchar los mensajes que se reciben del servidor

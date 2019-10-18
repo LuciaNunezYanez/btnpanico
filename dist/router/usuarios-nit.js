@@ -29,7 +29,8 @@ router.get('/:id', [verificaToken, verificaAdmin_role], function (req, res) {
     });
 });
 // Agregar usuarios NIT
-router.post('/', [verificaToken, verificaAdmin_role], function (req, res) {
+// [verificaToken, verificaAdmin_role], 
+router.post('/', function (req, res) {
     // Encriptar contraseña FORMA 1 
     var contrasena = (req.body.contrasena);
     // Quizá quitando el escape
@@ -38,7 +39,7 @@ router.post('/', [verificaToken, verificaAdmin_role], function (req, res) {
     var nombre = mysql_1.default.instance.cnn.escape(req.body.nombre);
     var apePat = mysql_1.default.instance.cnn.escape(req.body.apePat);
     var apeMat = mysql_1.default.instance.cnn.escape(req.body.apeMat) || '';
-    var usuario = mysql_1.default.instance.cnn.escape(req.body.usuario);
+    var usuario = mysql_1.default.instance.cnn.escape(req.body.id);
     var tipoUsuario = req.body.tipo;
     var depend = mysql_1.default.instance.cnn.escape(req.body.depend);
     var sexo = mysql_1.default.instance.cnn.escape(req.body.sexo);
@@ -54,7 +55,7 @@ router.post('/', [verificaToken, verificaAdmin_role], function (req, res) {
         else {
             return res.json({
                 ok: true,
-                resp: req.body.usuario
+                resp: req.body.id
             });
         }
     });
