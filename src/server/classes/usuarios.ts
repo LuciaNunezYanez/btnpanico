@@ -51,7 +51,10 @@ class Usuarios {
     }
 
     getPersonasPorSala(sala: string ) {
-        // ...
+        let usuariosEnSala = this.personas.filter( (persona: any) => {
+            return persona.sala  === sala;
+        });
+        return usuariosEnSala;
     }
 
     borrarPersona(id: string) {

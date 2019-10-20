@@ -8,13 +8,22 @@ export default class MySQL {
         
     constructor(){
         console.log('Clase inicializada de MYSQL');
-        // Configuración de la conexion de la DB 
+        // Configuración de la conexion de la DB LOCAL 
+        // this.cnn = mysql.createConnection({
+        //     host: 'localhost',
+        //     user: 'root',
+        //     password: 'M7750la?',
+        //     database: 'db_btn_panico'
+        // });
+        
+        // Configuración de la conexion de la DB REMOTA 
         this.cnn = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: 'M7750la?',
-            database: 'db_btn_panico'
+            host: 'us-cdbr-iron-east-05.cleardb.net',
+            user: 'b2426e4e5d830f',
+            password: '60ccf3c4',
+            database: 'heroku_063696d7f49647b'
         });
+
         this.conectarDB();
     }
 

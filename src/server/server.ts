@@ -52,8 +52,8 @@ export default class Server{
             // Escuchar cuando un cliente se conecto
             socket.CONECTADO(cliente);
             
-            // Escuchar cuando un cliente se desconecto 
-            socket.DESCONECTADO(cliente);
+            // // Escuchar cuando un cliente se desconecto 
+            // socket.DESCONECTADO(cliente);
             
         });
     }

@@ -33,7 +33,10 @@ var Usuarios = /** @class */ (function () {
         return this.personas;
     };
     Usuarios.prototype.getPersonasPorSala = function (sala) {
-        // ...
+        var usuariosEnSala = this.personas.filter(function (persona) {
+            return persona.sala === sala;
+        });
+        return usuariosEnSala;
     };
     Usuarios.prototype.borrarPersona = function (id) {
         var personaBorrada = this.getPersona(id);

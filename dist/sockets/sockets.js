@@ -8,21 +8,41 @@ exports.CONECTADO = function (cliente) {
     // USUARIOS NIT
     // ==================================
     cliente.on('loginNIT', function (usuario, callback) {
-        // console.log('=========== USUARIO NIT CONECTADO ============');
-        console.log('Usuario conectado del NIT:', usuario);
-        // Agregar el usuario a la lista de personas conectadas 
-        if (!usuario.usuario) {
+        if (!usuario.sala) {
             return callback({
-                error: true,
-                mensaje: 'El usuario es necesario'
+                ok: false,
+                mensaje: 'La sala es necesaria'
             });
         }
-        console.log('LOS DATOS RECIBIDOS SON: ', usuario);
-        var conectados = usuarios.agregarPersona(cliente.id, usuario.usuario, usuario.nombre, usuario.apePat, usuario.apeMat, usuario.tipo, usuario.depend, usuario.sexo, usuario.sala);
-        callback(conectados);
+        // EL USUARIO SE UNE A UNA SALA
+        cliente.join(usuario.sala);
+        console.log("(loginNIT) Usuario " + usuario.usuario + " conectado a la sala " + usuario.sala + ": ");
+        // AGREGA EL USUARIO A LA LISTA DE PERSONAS CONECTADAS 
+        var misUsuarios = usuarios.agregarPersona(cliente.id, usuario.usuario, usuario.nombre, usuario.apePat, usuario.apeMat, usuario.tipo, usuario.depend, usuario.sexo, usuario.sala);
+        // console.log('GET PESONAS POR SALA: ', usuarios.getPersonasPorSala(usuario.sala));
+        cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
+        callback(usuarios.getPersonasPorSala(usuario.sala));
+    });
+    // ========================================
+    // CLIENTE DESCONECTADO (NIT y comercios)
+    // ========================================
+    cliente.on('disconnect', function () {
+        var usuarioBorrado = usuarios.borrarPersona(cliente.id);
+        // Aquí me falta un emit 
+        if (usuarioBorrado.sala === undefined) {
+            return new Error('¡¡Sala indefinida!!');
+        }
+        cliente.broadcast.to(usuarioBorrado.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuarioBorrado.sala));
+        // EMITE A TODOS LOS CLIENTES LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
+        // cliente.broadcast.emit('listaUsuariosNIT', usuarios.getPersonas());
+        // Elimina de la lista al cliente que salio de la sala
+        // const personaBorrada = usuarios.borrarPersona( cliente.id );
+        // EMITE SOLO A SU SALA LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
+        // cliente.broadcast.to(personaBorrada.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(personaBorrada.sala));
+        console.log('<- CLIENTE DESCONECTADO');
     });
     // ==================================
-    // USUARIOS BOTON DE PANICO 
+    // ON CONNECT DE LOS USUARIOS BOTON DE PANICO 
     // ==================================
     cliente.on('botonActivado', function (codigoComercio) {
         var COD_COMERCIO = codigoComercio;
@@ -37,13 +57,6 @@ exports.CONECTADO = function (cliente) {
         // Se genera alerta en el dashboard 
     });
     cliente.on('fotografias', Object);
-};
-// Envia la alerta a TODOS 
-// this.io.emit('recibido', respuesta);
-exports.DESCONECTADO = function (cliente) {
-    cliente.on('disconnect', function () {
-        console.log('<- CLIENTE DESCONECTADO');
-    });
 };
 // Escuchar mensaje de tipo socket ¿De quien? 
 exports.mensaje = function (cliente) {

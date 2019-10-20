@@ -49,8 +49,8 @@ var Server = /** @class */ (function () {
             socket.mensaje(cliente);
             // Escuchar cuando un cliente se conecto
             socket.CONECTADO(cliente);
-            // Escuchar cuando un cliente se desconecto 
-            socket.DESCONECTADO(cliente);
+            // // Escuchar cuando un cliente se desconecto 
+            // socket.DESCONECTADO(cliente);
         });
     };
     Server.prototype.start = function (callback) {
