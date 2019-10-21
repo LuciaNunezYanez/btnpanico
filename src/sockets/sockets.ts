@@ -43,9 +43,12 @@ export const CONECTADO = (cliente: Socket) => {
     cliente.on('disconnect', () =>{
         let usuarioBorrado = usuarios.borrarPersona ( cliente.id );
         // Aquí me falta un emit 
-        if(usuarioBorrado.sala===undefined){
-            return new Error('¡¡Sala indefinida!!');
+        if(!usuarioBorrado === undefined){
+            if(usuarioBorrado.sala===undefined){
+                return new Error('¡¡Sala indefinida!!');
+            }
         }
+        
         cliente.broadcast.to(usuarioBorrado.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuarioBorrado.sala));
         
         // EMITE A TODOS LOS CLIENTES LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
