@@ -44,15 +44,16 @@ exports.CONECTADO = function (cliente) {
     // ==================================
     // ON CONNECT DE LOS USUARIOS BOTON DE PANICO 
     // ==================================
-    cliente.on('botonActivado', function (codigoComercio) {
-        var COD_COMERCIO = codigoComercio;
+    cliente.on('botonActivado', function (comercio) {
+        var DATA_COMERCIO = comercio;
         // Se recibe el codigo de comercio para traer los datos de la BASE DE DATOS
         // Despues de traerlos se emiten a ANGULAR
-        console.log("Nueva alerta de p\u00E1nico del comercio: " + COD_COMERCIO);
+        console.log("Nueva alerta de p\u00E1nico del comercio: " + DATA_COMERCIO);
         cliente.emit('alertaRecibida', 'Se ha recibido tu alerta');
         // Se debe enviar la alerta a todos los clientes de ANGULAR
+        cliente.broadcast.to('NIT').emit('nuevaAlerta', DATA_COMERCIO);
     });
-    cliente.on('datosComercio', function (codigoComercio) {
+    cliente.on('datosComercio', function (comercio) {
         // Se recibe el codigo del comercio
         // Se genera alerta en el dashboard 
     });
