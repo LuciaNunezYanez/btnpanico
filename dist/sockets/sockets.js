@@ -27,17 +27,12 @@ exports.CONECTADO = function (cliente) {
     // CLIENTE DESCONECTADO (NIT y comercios)
     // ========================================
     cliente.on('disconnect', function () {
-        var usuarioBorrado = usuarios.borrarPersona(cliente.id);
-        // Aquí me falta un emit 
-        if (!usuarioBorrado === undefined) {
-            if (usuarioBorrado.sala === undefined) {
-                return new Error('¡¡Sala indefinida!!');
-            }
-        }
-        cliente.broadcast.to(usuarioBorrado.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuarioBorrado.sala));
-        // EMITE A TODOS LOS CLIENTES LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
-        // cliente.broadcast.emit('listaUsuariosNIT', usuarios.getPersonas());
-        // Elimina de la lista al cliente que salio de la sala
+        // let usuarioBorrado = usuarios.borrarPersona ( cliente.id );
+        // if(usuarioBorrado === undefined){
+        //     console.log('No se elimino nadie ');
+        // } else {
+        //     cliente.broadcast.to(usuarioBorrado.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuarioBorrado.sala));
+        // }
         // const personaBorrada = usuarios.borrarPersona( cliente.id );
         // EMITE SOLO A SU SALA LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
         // cliente.broadcast.to(personaBorrada.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(personaBorrada.sala));
