@@ -13,18 +13,18 @@ var MySQL = /** @class */ (function () {
         //     database: 'db_btn_panico'
         // });
         // Configuración de la conexion de la DB REMOTA 
-        // this.cnn = mysql.createConnection({
-        //     host: 'us-cdbr-iron-east-05.cleardb.net',
-        //     user: 'b2426e4e5d830f',
-        //     password: '60ccf3c4',
-        //     database: 'heroku_063696d7f49647b'
-        // });
-        this.cnn = mysql.createPool({
+        this.cnn = mysql.createConnection({
             host: 'us-cdbr-iron-east-05.cleardb.net',
             user: 'b2426e4e5d830f',
             password: '60ccf3c4',
             database: 'heroku_063696d7f49647b'
         });
+        // this.cnn = mysql.createPool ({
+        //     host: 'us-cdbr-iron-east-05.cleardb.net',
+        //     user: 'b2426e4e5d830f',
+        //     password: '60ccf3c4',
+        //     database: 'heroku_063696d7f49647b'
+        // });
         this.conectarDB();
     }
     Object.defineProperty(MySQL, "instance", {

@@ -3,7 +3,7 @@ import mysql = require('mysql');
 export default class MySQL {
     // Evita tener varias conexiones abiertas
     private static _instance: MySQL;
-    cnn: any; //: mysql.Connection
+    cnn: mysql.Connection;
     conectado: boolean = false;
         
     constructor(){
@@ -17,19 +17,19 @@ export default class MySQL {
         // });
         
         // Configuración de la conexion de la DB REMOTA 
-        // this.cnn = mysql.createConnection({
-        //     host: 'us-cdbr-iron-east-05.cleardb.net',
-        //     user: 'b2426e4e5d830f',
-        //     password: '60ccf3c4',
-        //     database: 'heroku_063696d7f49647b'
-        // });
-
-        this.cnn = mysql.createPool ({
+        this.cnn = mysql.createConnection({
             host: 'us-cdbr-iron-east-05.cleardb.net',
             user: 'b2426e4e5d830f',
             password: '60ccf3c4',
             database: 'heroku_063696d7f49647b'
         });
+
+        // this.cnn = mysql.createPool ({
+        //     host: 'us-cdbr-iron-east-05.cleardb.net',
+        //     user: 'b2426e4e5d830f',
+        //     password: '60ccf3c4',
+        //     database: 'heroku_063696d7f49647b'
+        // });
 
         this.conectarDB();
     }
