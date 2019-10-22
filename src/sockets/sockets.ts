@@ -53,7 +53,7 @@ export const CONECTADO = (cliente: Socket) => {
         // const personaBorrada = usuarios.borrarPersona( cliente.id );
         // EMITE SOLO A SU SALA LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
         // cliente.broadcast.to(personaBorrada.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(personaBorrada.sala));
-        console.log('<- CLIENTE DESCONECTADO');
+        console.log('<--- CLIENTE DESCONECTADO -- ');
     });
 
 
