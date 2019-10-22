@@ -3,7 +3,7 @@ import mysql = require('mysql');
 export default class MySQL {
     // Evita tener varias conexiones abiertas
     private static _instance: MySQL;
-    cnn: mysql.Connection;
+    cnn: any; //: mysql.Connection
     conectado: boolean = false;
         
     constructor(){
@@ -17,7 +17,14 @@ export default class MySQL {
         // });
         
         // Configuración de la conexion de la DB REMOTA 
-        this.cnn = mysql.createConnection({
+        // this.cnn = mysql.createConnection({
+        //     host: 'us-cdbr-iron-east-05.cleardb.net',
+        //     user: 'b2426e4e5d830f',
+        //     password: '60ccf3c4',
+        //     database: 'heroku_063696d7f49647b'
+        // });
+
+        this.cnn = mysql.createPool ({
             host: 'us-cdbr-iron-east-05.cleardb.net',
             user: 'b2426e4e5d830f',
             password: '60ccf3c4',
@@ -33,7 +40,7 @@ export default class MySQL {
     }
 
     static ejecutarQuery(query: string, callback: Function) {
-        this.instance.cnn.query(query, (err, results: Object[], fields ) => {
+        this.instance.cnn.query(query, (err: any , results: Object[], fields: any ) => {
             if(err){
                 console.log('==== Error en Query');
                 return callback( err );
@@ -50,7 +57,7 @@ export default class MySQL {
     private conectarDB() {
         this.cnn.connect((err: mysql.MysqlError) => {
             if(err) {
-                console.log(err.message);
+                console.log('Ocurrio un error:', err.message);
                 return;
             }
             this.conectado = true;
