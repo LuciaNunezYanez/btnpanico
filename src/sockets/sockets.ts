@@ -38,6 +38,9 @@ export const CONECTADO = (cliente: Socket) => {
         callback(usuarios.getPersonasPorSala(usuario.sala));
     });
 
+    cliente.on('error', ( error) => {
+        console.log('El error es: ', error);
+    });
     // ========================================
     // CLIENTE DESCONECTADO (NIT y comercios)
     // ========================================
