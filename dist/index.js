@@ -12,12 +12,19 @@ var usuarios_nit_1 = __importDefault(require("./router/usuarios-nit"));
 var alertas_1 = __importDefault(require("./router/alertas"));
 var login_1 = __importDefault(require("./router/login"));
 var body_parser_1 = __importDefault(require("body-parser"));
+var cors_1 = __importDefault(require("cors"));
 var server = server_1.default.instance;
 // BodyParser
 server.app.use(body_parser_1.default.urlencoded({ extended: true }));
 server.app.use(body_parser_1.default.json());
 // CORS - Para permitir que se puedan llamar los servicios     
-// server.app.use(cors ({origin: true, credentials: true}));
+// server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
+server.app.use(cors_1.default({
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+}));
 server.app.use(function (err, req, res, next) {
     if (err) {
         return res.status(500).send('Ocurrio un error de acceso');

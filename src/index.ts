@@ -17,7 +17,13 @@ server.app.use(bodyParser.urlencoded({ extended: true}));
 server.app.use(bodyParser.json());
 
 // CORS - Para permitir que se puedan llamar los servicios     
-// server.app.use(cors ({origin: true, credentials: true}));
+// server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
+server.app.use(cors ({
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
 server.app.use((err: any, req: any, res: any, next: any) => {
     if(err) {
       return res.status(500).send('Ocurrio un error de acceso');
