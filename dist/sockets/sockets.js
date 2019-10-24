@@ -27,6 +27,9 @@ exports.CONECTADO = function (cliente) {
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));
     });
+    cliente.on('error', function (error) {
+        console.log('El error es: ', error);
+    });
     // ========================================
     // CLIENTE DESCONECTADO (NIT y comercios)
     // ========================================
