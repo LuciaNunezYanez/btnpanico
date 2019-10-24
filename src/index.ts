@@ -18,7 +18,10 @@ server.app.use(bodyParser.json());
 
 // CORS - Para permitir que se puedan llamar los servicios     
 // server.app.use(cors ({origin: true, credentials: true}));
-server.app.use(function(req, res, next) {
+server.app.use((err: any, req: any, res: any, next: any) => {
+    if(err) {
+      return res.status(500).send('Ocurrio un error de acceso');
+    }
     // res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
     // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     // res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
