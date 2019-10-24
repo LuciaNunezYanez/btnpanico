@@ -8,7 +8,8 @@ import alertas from './router/alertas';
 import login from './router/login';
 
 import bodyParser from 'body-parser';
-import cors from 'cors';
+var cors = require('cors');
+// import cors from 'cors';
 
 const server = Server.instance;
 
@@ -18,27 +19,30 @@ server.app.use(bodyParser.json());
 
 // CORS - Para permitir que se puedan llamar los servicios     
 // server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
-server.app.use(cors ({
-  origin: "*",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-server.app.use((err: any, req: any, res: any, next: any) => {
-    if(err) {
-      return res.status(500).send('Ocurrio un error de acceso');
-    }
-    // res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-    // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    // res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-
+server.app.use(cors(), (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', '*');
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-
     next();
-  });
+});
+
+// server.app.use((err: any, req: any, res: any, next: any) => {
+//     if(err) {
+//       return res.status(500).send('Ocurrio un error de acceso');
+//     }
+//     // res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+//     // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     // res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+//     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+//     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+
+//     next();
+//   });
 
 // Rutas de servicios 
 server.app.use('/comercio', comercios);
