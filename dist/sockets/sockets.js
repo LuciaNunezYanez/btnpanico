@@ -49,7 +49,11 @@ exports.CONECTADO = function (cliente) {
     // USUARIOS BOTON DE PANICO 
     // ==================================
     cliente.on('botonActivado', function (comercio) {
-        var DATA_COMERCIO = comercio;
+        var elComercio = {
+            codigo: 3,
+            usuario: 3
+        };
+        var DATA_COMERCIO = elComercio;
         console.log("Nueva alerta de p\u00E1nico del comercio: " + DATA_COMERCIO.codigo);
         // Información del comercio
         var codComercio = DATA_COMERCIO.codigo;

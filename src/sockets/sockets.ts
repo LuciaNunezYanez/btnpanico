@@ -66,7 +66,12 @@ export const CONECTADO = (cliente: Socket) => {
     // USUARIOS BOTON DE PANICO 
     // ==================================
     cliente.on('botonActivado', function(comercio){ // Suponiendo que es un objeto
-        const DATA_COMERCIO = comercio;
+        const elComercio = {
+            codigo: 3, 
+            usuario: 3
+        };
+        
+        const DATA_COMERCIO = elComercio;
         console.log(`Nueva alerta de pánico del comercio: ${DATA_COMERCIO.codigo}`);               
         
         // Información del comercio
