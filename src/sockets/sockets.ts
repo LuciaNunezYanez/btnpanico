@@ -6,7 +6,7 @@ const { Usuarios }  = require('../server/classes/usuarios');
 const usuarios = new Usuarios();
 
 export const CONECTADO = (cliente: Socket) => {
-    console.log("-> CLIENTE CONECTADO");
+    console.log("-> CLIENTE CONECTADO - DESCONOCIDO");
 
     // ==================================
     // USUARIOS NIT
@@ -21,112 +21,96 @@ export const CONECTADO = (cliente: Socket) => {
         // EL USUARIO SE UNE A UNA SALA
         cliente.join(usuario.sala);
         console.log(`(loginNIT) Usuario ${usuario.usuario} conectado a la sala ${usuario.sala}: `);
-
         // AGREGA EL USUARIO A LA LISTA DE PERSONAS CONECTADAS 
-        let misUsuarios = usuarios.agregarPersona(
+        let usuariosNITConectados = usuarios.agregarUsuario(
                         cliente.id, 
                         usuario.usuario, 
                         usuario.nombre, 
+                        usuario.sala,
                         usuario.apePat, 
                         usuario.apeMat, 
                         usuario.tipo, 
                         usuario.depend,
-                        usuario.sexo,
-                        usuario.sala);
-        // console.log('GET PESONAS POR SALA: ', usuarios.getPersonasPorSala(usuario.sala));
+                        usuario.sexo);
+        // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));
     });
 
-    cliente.on('error', ( error) => {
-        console.log('El error es: ', error);
-    });
-    // ========================================
-    // CLIENTE DESCONECTADO (NIT y comercios)
-    // ========================================
-    cliente.on('disconnect', () =>{
-        // let usuarioBorrado = usuarios.borrarPersona ( cliente.id );
-        
-        // if(usuarioBorrado === undefined){
-        //     console.log('No se elimino nadie ');
-        // } else {
-        //     cliente.broadcast.to(usuarioBorrado.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuarioBorrado.sala));
-        // }
-        
 
-        // const personaBorrada = usuarios.borrarPersona( cliente.id );
-        // EMITE SOLO A SU SALA LA NUEVA LISTA DE LOS USUARIOS CONECTADOS
-        // cliente.broadcast.to(personaBorrada.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(personaBorrada.sala));
-        console.log('<--- CLIENTE DESCONECTADO -- ');
-    });
 
+    // ========================================
+    // CLIENTE DESCONECTADO
+    // ========================================
+    cliente.on('disconnect', function (){
+        // let misSalas = usuarios.getPersonas();
+        // console.log('Mis salas: ', misSalas);
+
+        let usuarioEliminado = usuarios.borrarPersona( cliente.id );
+        if (usuarioEliminado === undefined){ 
+            console.log('S<- CLIENTE DESCONECTADO - COMERCIO INACTIVO');
+        } else { 
+            if(usuarioEliminado.sala === 'NIT'){
+                console.log('<- CLIENTE DESCONECTADO - NIT');
+            } else if(usuarioEliminado.sala === 'Comercios'){
+                console.log('<- CLIENTE DESCONECTADO - COMERCIO ACTIVO');
+            }
+        }
+    });
 
 
     // ==================================
     // USUARIOS BOTON DE PANICO 
     // ==================================
     cliente.on('botonActivado', function(comercio){ // Suponiendo que es un objeto
-        const elComercio = {
-            codigo: 3, 
-            usuario: 3
-        };
+        const { idComercio, idUsuario, sala, fecha } = comercio;
+        console.log(`Nueva alerta de pánico del comercio: ${idComercio},${idUsuario},${sala},${fecha} `);               
         
-        const DATA_COMERCIO = elComercio;
-        console.log(`Nueva alerta de pánico del comercio: ${DATA_COMERCIO.codigo}`);               
-        
-        // Información del comercio
-        const codComercio = DATA_COMERCIO.codigo;
+        // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS 
+        usuarios.agregarUsuario(
+            cliente.id, 
+            idUsuario, 
+            idComercio, 
+            sala);
 
-        const query = `CALL getComercioID(${codComercio});`;
-        let dataComercio: any;
-        MySQL.ejecutarQuery(query, (err: any, data: any[][]) => {
-            if(err) {
-                console.log('Ocurrió un error al traer datos del comercio: ', err);
-            } else {
-                dataComercio = data [0][0];
-                if(dataComercio === undefined){
-                    console.log(`El comercio con codigo ${codComercio} no existe en la BD.`);
-                } else {
-                    //VARIABLES DE INCERCIÓN 
-                    const nit:number = 1;
-                    const cod:number = DATA_COMERCIO.codigo;
-                    const usuarioo:number = DATA_COMERCIO.usuario;
-                    const unidad:number = 1;
-                    const fechaDoc = MySQL.instance.cnn.escape('2019-10-22');
-                    const fechaAtaq = MySQL.instance.cnn.escape('2019-10-23');
-                    const incidente:number = 1;
-                    const emergencia = MySQL.instance.cnn.escape('Desconocida');
-                    const clasificacion:number = 1;
-                    const estatus:number = 1;
-                    const conclusion = MySQL.instance.cnn.escape('Pendiente');
-                    
+        // UNIR EL USUARIO A LA SALA 
+        cliente.join(sala);
 
+        //VARIABLES DE INSERCIÓN 
+        const nit:number = 1;
+        const cod:number = idComercio;
+        const usuarioo:number = idUsuario;
+        const unidad:number = 1;
+        const fechaDoc = MySQL.instance.cnn.escape('2019-10-28 15:24:55'); // TOMAR MI FECHA Y HORA DEL SISTEMA
+        const fechaAtaq = MySQL.instance.cnn.escape(fecha);
+        const incidente:number = 1;
+        const emergencia = MySQL.instance.cnn.escape('Desconocida');
+        const clasificacion:number = 1;
+        const estatus:number = 1;
+        const conclusion = MySQL.instance.cnn.escape('Pendiente');
 
-                    const addReporte = `CALL addReporteRtID(${ nit },${ cod },${ usuarioo },${ unidad },${ fechaDoc },
-                        ${ fechaAtaq },${ incidente },${ emergencia },${ clasificacion },${ estatus },${ conclusion }, @last_id);`;
+        // console.log(`CALL addReporteRtID(${ nit },${ cod },${ usuarioo },${ unidad },${ fechaDoc },
+        //     ${ fechaAtaq },${ incidente },${ emergencia },${ clasificacion },${ estatus },${ conclusion }, @last_id);`);
+        //     return;
+        const addReporte = `CALL addReporteRtID(${ nit },${ cod },${ usuarioo },${ unidad },${ fechaDoc },
+            ${ fechaAtaq },${ incidente },${ emergencia },${ clasificacion },${ estatus },${ conclusion }, @last_id);`;
 
-                        //DATA_COMERCIO.fhAtaque
-                    MySQL.ejecutarQuery(addReporte, (err: any, id:any[][]) => {
-                        if(err){
-                            console.log('Ocurrió un error al agregar un reporte: ', err);
-                        } else { // Se retornan los datos del reporte
-                            console.log(`Se agrego el reporte ${id[0][0].last_id}`);
-                            cliente.emit('alertaRecibida', 'Se ha recibido tu alerta');
-                            // Se debe enviar la alerta a todos los clientes de ANGULAR
-                            // DATA REPORTE en vez de DATA_COMERCIO
-                            cliente.broadcast.to('NIT').emit('nuevaAlerta', DATA_COMERCIO);
-                        }
-                    });
-                }
-                // console.log('La información del comercio es: ', data[0][0]);
+        MySQL.ejecutarQuery(addReporte, (err: any, id:any[][]) => {
+            if(err){
+                console.log('No se pudo agregar reporte: ', err ,
+                '--------------------------------------------------');
+            } else { 
+                // Se retornan los datos del reporte
+                const reporteAgregado = id[0][0].last_id;
+                console.log(`Se agrego el reporte ${reporteAgregado}`);
+                // Emitir a cliente android que la alerta se recibio 
+                cliente.emit('alertaRecibida', 'ALERTA RECIBIDA');
+                // Emitir alerta a todos los usuarios NIT
+                cliente.broadcast.to('NIT').emit('nuevaAlerta', reporteAgregado);
             }
-
-        })
-        
-        
-        
-        
-    });
+        });
+    }
+    );
 
     cliente.on('datosComercio', function(comercio){
         // Se recibe el codigo del comercio
@@ -136,7 +120,7 @@ export const CONECTADO = (cliente: Socket) => {
     cliente.on('fotografias', Object);
 }
 
-// Escuchar mensaje de tipo socket ¿De quien? 
+// Escuchar mensaje de tipo socket ¿De quien? // No se utiliza por el momento
 export const mensaje = (cliente: Socket) => {
     cliente.on('mensaje', (payload) => {
         console.log('RECIBIENDO  MENSAJE');

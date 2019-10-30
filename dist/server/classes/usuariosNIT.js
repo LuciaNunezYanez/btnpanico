@@ -7,19 +7,20 @@ var Usuarios = /** @class */ (function () {
         this.usuarios = [];
         this.usuarios = [];
     }
-    Usuarios.prototype.agregarUsuario = function (id, usuario, nombre, sala, apePat, apeMat, tipo, depend, sexo) {
+    Usuarios.prototype.agregarUsuario = function (id, usuario, nombre, apePat, apeMat, tipo, depend, sexo, sala) {
         var persona = {
             id: id,
             usuario: usuario,
             nombre: nombre,
-            sala: sala,
             apePat: apePat,
             apeMat: apeMat,
             tipo: tipo,
             depend: depend,
-            sexo: sexo
+            sexo: sexo,
+            sala: sala
         };
         this.usuarios.push(persona);
+        // Retorna todas las personas en el arreglo
         return this.usuarios;
     };
     Usuarios.prototype.getPersona = function (id) {

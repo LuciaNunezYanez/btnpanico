@@ -5,41 +5,39 @@
 
 class Usuarios {
 
-    personas:Object[] = [];
+    usuarios:Object[] = [];
 
     constructor() {
-        this.personas = [];
+        this.usuarios = [];
 
     }
 
-    agregarPersona(id:any, 
+    agregarUsuario(id:any, 
         usuario: string, 
-        nombre: string, 
-        apePat: string, 
-        apeMat: string, 
-        tipo: string, 
-        depend: string, 
-        sexo: string, 
-        sala: string ) {
+        nombre: string,
+        sala: string, 
+        apePat?: string, 
+        apeMat?: string, 
+        tipo?: string, 
+        depend?: string, 
+        sexo?: string) {
 
         let persona = { 
             id, // ID DEL SOCKET 
             usuario,
             nombre,
+            sala,
             apePat, 
             apeMat,
             tipo, 
             depend, 
-            sexo, 
-            sala };
-        this.personas.push(persona);
-
-        // Retorna todas las personas en el arreglo
-        return this.personas;
+            sexo};
+        this.usuarios.push(persona);
+        return this.usuarios;
     }
 
     getPersona(id: any) {
-        let persona = this.personas.filter((persona: any) => {
+        let persona = this.usuarios.filter((persona: any) => {
             return persona.id === id;
         })[0];
 
@@ -47,11 +45,11 @@ class Usuarios {
     }
 
     getPersonas() {
-        return this.personas;
+        return this.usuarios;
     }
 
     getPersonasPorSala(sala: string ) {
-        let usuariosEnSala = this.personas.filter( (persona: any) => {
+        let usuariosEnSala = this.usuarios.filter( (persona: any) => {
             return persona.sala  === sala;
         });
         return usuariosEnSala;
@@ -60,7 +58,7 @@ class Usuarios {
     borrarPersona(id: string) {
         let personaBorrada = this.getPersona(id);
 
-        this.personas = this.personas.filter((persona: any) => {
+        this.usuarios = this.usuarios.filter((persona: any) => {
             return persona.id != id
         })
 

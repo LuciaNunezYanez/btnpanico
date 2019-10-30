@@ -13,7 +13,6 @@ var alertas_1 = __importDefault(require("./router/alertas"));
 var login_1 = __importDefault(require("./router/login"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var cors = require('cors');
-// import cors from 'cors';
 var server = server_1.default.instance;
 // BodyParser
 server.app.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -28,19 +27,6 @@ server.app.use(cors(), function (req, res, next) {
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
     next();
 });
-// server.app.use((err: any, req: any, res: any, next: any) => {
-//     if(err) {
-//       return res.status(500).send('Ocurrio un error de acceso');
-//     }
-//     // res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-//     // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     // res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-//     res.header('Access-Control-Allow-Origin', '*');
-//     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
-//     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-//     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-//     next();
-//   });
 // Rutas de servicios 
 server.app.use('/comercio', comercio_1.default);
 server.app.use('/reporte', reporte_1.default);

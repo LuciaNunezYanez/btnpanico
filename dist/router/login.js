@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-// import * from '../server/globals';
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 var router = express_1.Router();

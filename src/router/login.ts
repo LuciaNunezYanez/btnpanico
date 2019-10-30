@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
-// import * from '../server/globals';
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = Router();
