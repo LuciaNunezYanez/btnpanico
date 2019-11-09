@@ -11,12 +11,13 @@ var nota_1 = __importDefault(require("./router/nota"));
 var usuarios_nit_1 = __importDefault(require("./router/usuarios-nit"));
 var alertas_1 = __importDefault(require("./router/alertas"));
 var login_1 = __importDefault(require("./router/login"));
+var uploads_1 = __importDefault(require("./router/uploads"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var cors = require('cors');
 var server = server_1.default.instance;
 // BodyParser
-server.app.use(body_parser_1.default.urlencoded({ extended: true }));
-server.app.use(body_parser_1.default.json());
+server.app.use(body_parser_1.default.urlencoded({ extended: true, limit: '50mb' }));
+server.app.use(body_parser_1.default.json({ limit: '50mb' }));
 // CORS - Para permitir que se puedan llamar los servicios     
 // server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
 server.app.use(cors(), function (req, res, next) {
@@ -25,6 +26,8 @@ server.app.use(cors(), function (req, res, next) {
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', '*');
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+    // Esta de prueba
+    res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=Strict");
     next();
 });
 // Rutas de servicios 
@@ -35,6 +38,7 @@ server.app.use('/nota', nota_1.default);
 server.app.use('/alerta', alertas_1.default);
 server.app.use('/usuarionit', usuarios_nit_1.default);
 server.app.use('/login', login_1.default);
+server.app.use('/upload', uploads_1.default);
 // MySQL get instance 
 // MySQL.instance;
 server.start(function () {

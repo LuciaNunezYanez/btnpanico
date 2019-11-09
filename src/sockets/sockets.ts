@@ -1,9 +1,10 @@
 import { Socket } from 'socket.io';
-import { callbackify } from 'util';
 import MySQL from '../mysql/mysql';
 const { Usuarios }  = require('../server/classes/usuarios');
+const { Alertas }  = require('../server/classes/alertas');
 
 const usuarios = new Usuarios();
+const alertas = new Alertas();
 
 export const CONECTADO = (cliente: Socket) => {
     console.log("-> CLIENTE CONECTADO - DESCONOCIDO");
@@ -38,14 +39,10 @@ export const CONECTADO = (cliente: Socket) => {
     });
 
 
-
     // ========================================
     // CLIENTE DESCONECTADO
     // ========================================
     cliente.on('disconnect', function (){
-        // let misSalas = usuarios.getPersonas();
-        // console.log('Mis salas: ', misSalas);
-
         let usuarioEliminado = usuarios.borrarPersona( cliente.id );
         if (usuarioEliminado === undefined){ 
             console.log('S<- CLIENTE DESCONECTADO - COMERCIO INACTIVO');
@@ -57,15 +54,15 @@ export const CONECTADO = (cliente: Socket) => {
             }
         }
     });
+    
 
-
-    // ==================================
-    // USUARIOS BOTON DE PANICO 
-    // ==================================
-    cliente.on('botonActivado', function(comercio){ // Suponiendo que es un objeto
+    // ========================================
+    // ALERTAS COMERCIOS
+    // ========================================
+    cliente.on('botonActivado', function(comercio){ 
         const { idComercio, idUsuario, sala, fecha } = comercio;
-        console.log(`Nueva alerta de pánico del comercio: ${idComercio},${idUsuario},${sala},${fecha} `);               
-        
+        console.log(`-> Nueva alerta de pánico del comercio: ${idComercio}`);               
+
         // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS 
         usuarios.agregarUsuario(
             cliente.id, 
@@ -76,54 +73,72 @@ export const CONECTADO = (cliente: Socket) => {
         // UNIR EL USUARIO A LA SALA 
         cliente.join(sala);
 
-        //VARIABLES DE INSERCIÓN 
-        const nit:number = 1;
-        const cod:number = idComercio;
-        const usuarioo:number = idUsuario;
-        const unidad:number = 1;
-        const fechaDoc = MySQL.instance.cnn.escape('2019-10-28 15:24:55'); // TOMAR MI FECHA Y HORA DEL SISTEMA
-        const fechaAtaq = MySQL.instance.cnn.escape(fecha);
-        const incidente:number = 1;
-        const emergencia = MySQL.instance.cnn.escape('Desconocida');
-        const clasificacion:number = 1;
-        const estatus:number = 1;
-        const conclusion = MySQL.instance.cnn.escape('Pendiente');
+        // Recibir datos p t reporte
+        const idUserCc: number = 1; // 1 = Sin atender
+        const idComercReporte: number = idComercio;
+        const idUserApp: number = idUsuario;
+        const idUnidad: number = 1; // 1 = Ninguna unidad
+        const fhDoc: string = MySQL.instance.cnn.escape(obtenerFechaHoy());
+        const fhAtaque: string = MySQL.instance.cnn.escape(fecha);
+        const tipoInc: number = 0 ; // 0 = Desconocido
+        const descripEmerg: string = MySQL.instance.cnn.escape('');
+        const clasifEmerg: number = 0; // 0 = Normal
+        const estatusActual: number = 0; // 0 = Sin atender
+        const cierreConcl: string = MySQL.instance.cnn.escape('');
 
-        // console.log(`CALL addReporteRtID(${ nit },${ cod },${ usuarioo },${ unidad },${ fechaDoc },
-        //     ${ fechaAtaq },${ incidente },${ emergencia },${ clasificacion },${ estatus },${ conclusion }, @last_id);`);
-        //     return;
-        const addReporte = `CALL addReporteRtID(${ nit },${ cod },${ usuarioo },${ unidad },${ fechaDoc },
-            ${ fechaAtaq },${ incidente },${ emergencia },${ clasificacion },${ estatus },${ conclusion }, @last_id);`;
+        const query = `CALL addReporteRtID(
+            ${idUserCc},
+            ${idComercReporte},
+            ${idUserApp},
+            ${idUnidad},
+            ${fhDoc},
+            ${fhAtaque},
+            ${tipoInc},
+            ${descripEmerg},
+            ${clasifEmerg},
+            ${estatusActual},
+            ${cierreConcl},
+            @last_id);`;
 
-        MySQL.ejecutarQuery(addReporte, (err: any, id:any[][]) => {
-            if(err){
-                console.log('No se pudo agregar reporte: ', err ,
-                '--------------------------------------------------');
-            } else { 
+        
+        MySQL.ejecutarQuery( query, (err: any, id:any[][]) => {
+            if(err) {
+                console.log('No se pudo agregar reporte: ', err);
+                 // Emitir a cliente android que NO se pudo agregar el reporte 
+                 cliente.emit('alertaNoRecibida', '0');
+
+            } else {
                 // Se retornan los datos del reporte
                 const reporteAgregado = id[0][0].last_id;
-                console.log(`Se agrego el reporte ${reporteAgregado}`);
-                // Emitir a cliente android que la alerta se recibio 
-                cliente.emit('alertaRecibida', 'ALERTA RECIBIDA');
-                // Emitir alerta a todos los usuarios NIT
-                cliente.broadcast.to('NIT').emit('nuevaAlerta', reporteAgregado);
+
+                let alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
+                cliente.broadcast.to('NIT').emit('alertaAgregada', alertaAgregada);
+                
+                console.log(`Se creó el reporte ${reporteAgregado}`);
+                // Emitir a cliente android que la alerta se recibio con el # del reporte 
+                cliente.emit('alertaRecibida', `${reporteAgregado}`);
             }
         });
     }
     );
-
-    cliente.on('datosComercio', function(comercio){
-        // Se recibe el codigo del comercio
-        // Se genera alerta en el dashboard 
-    });
-    
-    cliente.on('fotografias', Object);
 }
 
-// Escuchar mensaje de tipo socket ¿De quien? // No se utiliza por el momento
-export const mensaje = (cliente: Socket) => {
-    cliente.on('mensaje', (payload) => {
-        console.log('RECIBIENDO  MENSAJE');
-        console.log(payload);
+export const MULTIMEDIA = (cliente: Socket) => {
+    console.log("-> ARCHIVO MULTIMEDIA RECIBIDO");
+    
+    cliente.on('imagenEnviada', (data, callback) => {
+        cliente.broadcast.to('NIT').emit('imagenNueva', usuarios.usuarios.getPersonasPorSala('NIT'));
     });
+}
+
+function obtenerFechaHoy(){
+    const fh = new Date();
+    let dia = fh.getDate();
+    let mes = fh.getMonth() +1 ;
+    let anio = fh.getFullYear();
+    let hora = fh.getHours();
+    let min = fh.getMinutes();
+    let seg = fh.getSeconds();
+    const fechaCompleta = `${ anio }-${ mes }-${ dia } ${ hora }:${ min }:${ seg }`;
+    return fechaCompleta;
 }

@@ -51,7 +51,7 @@ exports.CONECTADO = function (cliente) {
     // ========================================
     cliente.on('botonActivado', function (comercio) {
         var idComercio = comercio.idComercio, idUsuario = comercio.idUsuario, sala = comercio.sala, fecha = comercio.fecha;
-        console.log("-> Nueva alerta de p\u00E1nico del comercio: " + idComercio);
+        console.log("-> Nueva alerta de p\u00E1nico del comercio: " + idComercio + "," + idUsuario + "," + sala + "," + fecha + " ");
         // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS 
         usuarios.agregarUsuario(cliente.id, idUsuario, idComercio, sala);
         // UNIR EL USUARIO A LA SALA 

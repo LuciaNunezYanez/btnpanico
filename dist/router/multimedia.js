@@ -27,26 +27,4 @@ router.get('/:id', function (req, res) {
         }
     });
 });
-// Agregar archivos multimedia 
-router.post('/', function (req, res) {
-    var fhCapturada = mysql_1.default.instance.cnn.escape(req.body.fh_captura);
-    var tipoArchivo = mysql_1.default.instance.cnn.escape(req.body.tipo_archivo);
-    var ruta = mysql_1.default.instance.cnn.escape(req.body.ruta);
-    var idReporte = req.body.id_reporte;
-    var query = "CALL addMultimediaRtID(\n                    " + fhCapturada + ",\n                    " + tipoArchivo + ",\n                    " + ruta + ",\n                    " + idReporte + ",\n                    @last_id);";
-    mysql_1.default.ejecutarQuery(query, function (err, id) {
-        if (err) {
-            return res.status(400).json({
-                ok: false,
-                error: err
-            });
-        }
-        else {
-            return res.json({
-                ok: true,
-                id: id[0][0].last_id
-            });
-        }
-    });
-});
 exports.default = router;

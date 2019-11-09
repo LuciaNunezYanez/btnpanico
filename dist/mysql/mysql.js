@@ -36,14 +36,10 @@ var MySQL = /** @class */ (function () {
                 return callback(err);
             }
             if (results.length === 0) {
-                callback('El registro solicitado no existe');
-                // Cerrar la conexión
-                // this.instance.cnn.end();
+                callback(null, 'El registro solicitado no existe');
             }
             else {
                 callback(null, results);
-                // Cerrar la conexión
-                // this.instance.cnn.end();
             }
         });
     };

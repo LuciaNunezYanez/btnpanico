@@ -6,11 +6,20 @@ const router = Router();
 
 // Obtener todos los comercios
 router.get('/' , (req: Request, res: Response) =>{
-    try {
-        res.render('./index');
-    } catch (error) {
-        console.log(error);
-    }
+    const query = `CALL getReportesPendient();`;
+    
+    MySQL.ejecutarQuery( query, (err: any, reportes: any) => {
+        if(err) {
+            console.log('Ocurrió un error al traer los reportes: ', err);
+        } else {
+            res.status(200).json({
+                ok: true, 
+                res: reportes
+            });
+        }
+    });
+    
 });
 
-export default router;
+export default
+ router;

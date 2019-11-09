@@ -26,34 +26,4 @@ router.get('/:id' , (req: Request, res: Response) =>{
 });
 
 
-// Agregar archivos multimedia 
-router.post('/', (req: Request, res: Response) => {
-    const fhCapturada: string = MySQL.instance.cnn.escape(req.body.fh_captura);
-    const tipoArchivo: string = MySQL.instance.cnn.escape(req.body.tipo_archivo);
-    const ruta: string = MySQL.instance.cnn.escape(req.body.ruta);
-    const idReporte: number = req.body.id_reporte;
-
-    const query = `CALL addMultimediaRtID(
-                    ${fhCapturada},
-                    ${tipoArchivo},
-                    ${ruta},
-                    ${idReporte},
-                    @last_id);`;
-
-    MySQL.ejecutarQuery(query, (err: any, id:any[][]) => {
-        if(err) {
-            return res.status(400).json({
-                ok: false, 
-                error: err
-            });
-        } else {
-            return res.json({
-                ok: true,
-                id: id[0][0].last_id
-            });
-        }
-    });
-    
-});
-
 export default router;
