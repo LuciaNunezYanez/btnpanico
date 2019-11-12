@@ -27,6 +27,7 @@ router.get('/:id', verificaToken, (req: Request, res: Response) => {
 });
 
 
+// No se utiliza por la aplicación móvil 
 router.post('/', verificaToken, (req: Request, res: Response) => {
 
     // Recibir datos p t reporte
@@ -41,6 +42,8 @@ router.post('/', verificaToken, (req: Request, res: Response) => {
     const clasifEmerg: number = req.body.clasif_emerg || 0; // 0 = Normal
     const estatusActual: number = req.body.estatus || 0; // 0 = Sin atender
     const cierreConcl: string = MySQL.instance.cnn.escape(req.body.cierre || '');
+
+    console.log('XD');
 
     const query = `CALL addReporteRtID(
                     ${idUserCc},

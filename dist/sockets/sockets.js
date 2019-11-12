@@ -3,9 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var mysql_1 = __importDefault(require("../mysql/mysql"));
 var Usuarios = require('../server/classes/usuarios').Usuarios;
 var Alertas = require('../server/classes/alertas').Alertas;
+var _a = require('../mysql/mysql-alertas'), obtenerAlertasPendientes = _a.obtenerAlertasPendientes, abrirPeticion = _a.abrirPeticion;
 var usuarios = new Usuarios();
 var alertas = new Alertas();
 exports.CONECTADO = function (cliente) {
@@ -28,6 +30,51 @@ exports.CONECTADO = function (cliente) {
         // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));
+        obtenerAlertasPendientes(function (err, alertas) {
+            if (err) {
+                // Deberia de mostrar una pantalla de alerta
+                console.log(err);
+            }
+            else {
+                cliente.emit('alertasActualizadas', alertas);
+            }
+        });
+    });
+    cliente.on('peticionAbierta', function (data, callback) {
+        if (!data.idReporte || !Number.isInteger(data.idReporte)) {
+            return callback({
+                ok: false,
+                resp: 'El folio del reporte es inválido.'
+            });
+        }
+        else if (!data.idUsuario || !Number.isInteger(data.idUsuario)) {
+            return callback({
+                ok: false,
+                resp: 'El usuario es inválido.'
+            });
+        }
+        abrirPeticion(data.idReporte, data.idUsuario, function (err, resp) {
+            if (err) {
+                // Deberia de mostrar una pantalla de alerta
+                console.log(err);
+            }
+            else {
+                // Mandar lista actualizada a todos los usuarios 
+                obtenerAlertasPendientes(function (err, alertas) {
+                    if (err) {
+                        // Deberia de mostrar una pantalla de alerta
+                        console.log(err);
+                    }
+                    else {
+                        cliente.emit('alertasActualizadas', alertas);
+                        callback(null, {
+                            ok: true,
+                            resp: 'Petición abierta con éxito.'
+                        });
+                    }
+                });
+            }
+        });
     });
     // ========================================
     // CLIENTE DESCONECTADO
@@ -56,35 +103,7 @@ exports.CONECTADO = function (cliente) {
         usuarios.agregarUsuario(cliente.id, idUsuario, idComercio, sala);
         // UNIR EL USUARIO A LA SALA 
         cliente.join(sala);
-        // Recibir datos p t reporte
-        var idUserCc = 1; // 1 = Sin atender
-        var idComercReporte = idComercio;
-        var idUserApp = idUsuario;
-        var idUnidad = 1; // 1 = Ninguna unidad
-        var fhDoc = mysql_1.default.instance.cnn.escape(obtenerFechaHoy());
-        var fhAtaque = mysql_1.default.instance.cnn.escape(fecha);
-        var tipoInc = 0; // 0 = Desconocido
-        var descripEmerg = mysql_1.default.instance.cnn.escape('');
-        var clasifEmerg = 0; // 0 = Normal
-        var estatusActual = 0; // 0 = Sin atender
-        var cierreConcl = mysql_1.default.instance.cnn.escape('');
-        var query = "CALL addReporteRtID(\n            " + idUserCc + ",\n            " + idComercReporte + ",\n            " + idUserApp + ",\n            " + idUnidad + ",\n            " + fhDoc + ",\n            " + fhAtaque + ",\n            " + tipoInc + ",\n            " + descripEmerg + ",\n            " + clasifEmerg + ",\n            " + estatusActual + ",\n            " + cierreConcl + ",\n            @last_id);";
-        mysql_1.default.ejecutarQuery(query, function (err, id) {
-            if (err) {
-                console.log('No se pudo agregar reporte: ', err);
-                // Emitir a cliente android que NO se pudo agregar el reporte 
-                cliente.emit('alertaNoRecibida', '0');
-            }
-            else {
-                // Se retornan los datos del reporte
-                var reporteAgregado = id[0][0].last_id;
-                var alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
-                cliente.broadcast.to('NIT').emit('alertaAgregada', alertaAgregada);
-                console.log("Se cre\u00F3 el reporte " + reporteAgregado);
-                // Emitir a cliente android que la alerta se recibio con el # del reporte 
-                cliente.emit('alertaRecibida', "" + reporteAgregado);
-            }
-        });
+        agregarReporte(cliente, idComercio, idUsuario, fecha);
     });
 };
 exports.MULTIMEDIA = function (cliente) {
@@ -103,4 +122,44 @@ function obtenerFechaHoy() {
     var seg = fh.getSeconds();
     var fechaCompleta = anio + "-" + mes + "-" + dia + " " + hora + ":" + min + ":" + seg;
     return fechaCompleta;
+}
+function agregarReporte(cliente, idComercio, idUsuario, fecha) {
+    // Recibir datos p t reporte
+    var idUserCc = 1; // 1 = Sin atender
+    var idComercReporte = idComercio;
+    var idUserApp = idUsuario;
+    var idUnidad = 1; // 1 = Ninguna unidad
+    var fhDoc = mysql_1.default.instance.cnn.escape(obtenerFechaHoy());
+    var fhAtaque = mysql_1.default.instance.cnn.escape(fecha);
+    var tipoInc = 0; // 0 = Desconocido
+    var descripEmerg = mysql_1.default.instance.cnn.escape('');
+    var clasifEmerg = 0; // 0 = Normal
+    var estatusActual = 0; // 0 = Sin atender
+    var cierreConcl = mysql_1.default.instance.cnn.escape('');
+    var query = "CALL addReporteRtID(\n        " + idUserCc + ",\n        " + idComercReporte + ",\n        " + idUserApp + ",\n        " + idUnidad + ",\n        " + fhDoc + ",\n        " + fhAtaque + ",\n        " + tipoInc + ",\n        " + descripEmerg + ",\n        " + clasifEmerg + ",\n        " + estatusActual + ",\n        " + cierreConcl + ",\n        @last_id);";
+    mysql_1.default.ejecutarQuery(query, function (err, id) {
+        if (err) {
+            console.log('No se pudo agregar reporte: ', err);
+            // Emitir a cliente android que NO se pudo agregar el reporte 
+            cliente.emit('alertaNoRecibida', '0');
+        }
+        else {
+            // Se retornan los datos del reporte
+            var reporteAgregado = id[0][0].last_id;
+            var alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
+            //cliente.broadcast.to('NIT').emit('alertaAgregada', alertaAgregada);
+            // VA EL MISMO CODIGO DE LOGIN 
+            obtenerAlertasPendientes(function (err, alertas) {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    cliente.broadcast.to('NIT').emit('alertasActualizadas', alertas);
+                }
+            });
+            console.log("Se cre\u00F3 el reporte " + reporteAgregado);
+            // Emitir a cliente android que la alerta se recibio con el # del reporte 
+            cliente.emit('alertaRecibida', "" + reporteAgregado);
+        }
+    });
 }
