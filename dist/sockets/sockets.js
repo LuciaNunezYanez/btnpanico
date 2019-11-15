@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var mysql_1 = __importDefault(require("../mysql/mysql"));
+var obtenerAlertasPendientes = require('../mysql/mysql-alertas.nit').obtenerAlertasPendientes;
+var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var Usuarios = require('../server/classes/usuarios').Usuarios;
 var Alertas = require('../server/classes/alertas').Alertas;
-var _a = require('../mysql/mysql-alertas'), obtenerAlertasPendientes = _a.obtenerAlertasPendientes, abrirPeticion = _a.abrirPeticion;
 var usuarios = new Usuarios();
 var alertas = new Alertas();
 exports.CONECTADO = function (cliente) {
@@ -37,42 +37,6 @@ exports.CONECTADO = function (cliente) {
             }
             else {
                 cliente.emit('alertasActualizadas', alertas);
-            }
-        });
-    });
-    cliente.on('peticionAbierta', function (data, callback) {
-        if (!data.idReporte || !Number.isInteger(data.idReporte)) {
-            return callback({
-                ok: false,
-                resp: 'El folio del reporte es inválido.'
-            });
-        }
-        else if (!data.idUsuario || !Number.isInteger(data.idUsuario)) {
-            return callback({
-                ok: false,
-                resp: 'El usuario es inválido.'
-            });
-        }
-        abrirPeticion(data.idReporte, data.idUsuario, function (err, resp) {
-            if (err) {
-                // Deberia de mostrar una pantalla de alerta
-                console.log(err);
-            }
-            else {
-                // Mandar lista actualizada a todos los usuarios 
-                obtenerAlertasPendientes(function (err, alertas) {
-                    if (err) {
-                        // Deberia de mostrar una pantalla de alerta
-                        console.log(err);
-                    }
-                    else {
-                        cliente.emit('alertasActualizadas', alertas);
-                        callback(null, {
-                            ok: true,
-                            resp: 'Petición abierta con éxito.'
-                        });
-                    }
-                });
             }
         });
     });
@@ -112,17 +76,6 @@ exports.MULTIMEDIA = function (cliente) {
         cliente.broadcast.to('NIT').emit('imagenNueva', usuarios.usuarios.getPersonasPorSala('NIT'));
     });
 };
-function obtenerFechaHoy() {
-    var fh = new Date();
-    var dia = fh.getDate();
-    var mes = fh.getMonth() + 1;
-    var anio = fh.getFullYear();
-    var hora = fh.getHours();
-    var min = fh.getMinutes();
-    var seg = fh.getSeconds();
-    var fechaCompleta = anio + "-" + mes + "-" + dia + " " + hora + ":" + min + ":" + seg;
-    return fechaCompleta;
-}
 function agregarReporte(cliente, idComercio, idUsuario, fecha) {
     // Recibir datos p t reporte
     var idUserCc = 1; // 1 = Sin atender
@@ -147,8 +100,6 @@ function agregarReporte(cliente, idComercio, idUsuario, fecha) {
             // Se retornan los datos del reporte
             var reporteAgregado = id[0][0].last_id;
             var alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
-            //cliente.broadcast.to('NIT').emit('alertaAgregada', alertaAgregada);
-            // VA EL MISMO CODIGO DE LOGIN 
             obtenerAlertasPendientes(function (err, alertas) {
                 if (err) {
                     console.log(err);
@@ -162,4 +113,15 @@ function agregarReporte(cliente, idComercio, idUsuario, fecha) {
             cliente.emit('alertaRecibida', "" + reporteAgregado);
         }
     });
+}
+function obtenerFechaHoy() {
+    var fh = new Date();
+    var dia = fh.getDate();
+    var mes = fh.getMonth() + 1;
+    var anio = fh.getFullYear();
+    var hora = fh.getHours();
+    var min = fh.getMinutes();
+    var seg = fh.getSeconds();
+    var fechaCompleta = anio + "-" + mes + "-" + dia + " " + hora + ":" + min + ":" + seg;
+    return fechaCompleta;
 }

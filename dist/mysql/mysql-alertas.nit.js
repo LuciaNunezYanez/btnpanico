@@ -22,22 +22,31 @@ function obtenerAlertasPendientes(callback) {
         }
     });
 }
-function abrirPeticion(idReporte, idUsuarioNIT, callback) {
-    var query = "CALL editEstatusReporte(" + idReporte + ", " + idUsuarioNIT + ", 1, @nuevo_estatus);";
-    mysql_1.default.ejecutarQuery(query, function (err, respuesta) {
-        if (err) {
-            callback({
-                ok: false,
-                err: err
-            });
-        }
-        else {
-            callback(null, {
-                ok: true,
-                respuesta: respuesta
-            });
-        }
-    });
+function abrirPeticion(alerta, callback) {
+    var id_reporte = alerta.id_reporte, estatus_actual = alerta.estatus_actual, id_user_cc = alerta.id_user_cc;
+    if (estatus_actual === 0) {
+        var query = "update reporte set id_user_cc = " + id_user_cc + ", estatus_actual = 1 where id_reporte = " + id_reporte;
+        mysql_1.default.ejecutarQuery(query, function (err, respuesta) {
+            if (err) {
+                callback({
+                    ok: false,
+                    err: err
+                });
+            }
+            else {
+                callback(null, {
+                    ok: true,
+                    respuesta: respuesta
+                });
+            }
+        });
+    }
+    else {
+        callback(null, {
+            ok: false,
+            err: 'La alerta ya fue atendida por otro usuario. '
+        });
+    }
 }
 module.exports = {
     obtenerAlertasPendientes: obtenerAlertasPendientes,

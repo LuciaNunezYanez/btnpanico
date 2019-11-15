@@ -11,7 +11,7 @@ var router = express_1.Router();
 // Log in
 router.post('/', function (req, res) {
     var usuario = mysql_1.default.instance.cnn.escape(req.body.usuario);
-    var passNoEnctrip = req.body.contrasenia;
+    var passNoEnctrip = req.body.contrasena;
     var query = "CALL getUsuarioCCID(" + usuario + ")";
     mysql_1.default.ejecutarQuery(query, function (err, data) {
         try {

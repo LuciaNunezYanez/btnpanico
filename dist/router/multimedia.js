@@ -27,4 +27,24 @@ router.get('/:id', function (req, res) {
         }
     });
 });
+// Obtener archivos multimedia por numero de reporte
+router.get('/reporte/:id_reporte', function (req, res) {
+    var id_reporte = req.params.id_reporte;
+    var escapedId = mysql_1.default.instance.cnn.escape(id_reporte);
+    var query = "CALL getMultimedRep(" + escapedId + ")";
+    mysql_1.default.ejecutarQuery(query, function (err, multimedia) {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                error: err
+            });
+        }
+        else {
+            return res.json({
+                ok: true,
+                multimedia: multimedia[0]
+            });
+        }
+    });
+});
 exports.default = router;

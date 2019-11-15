@@ -3,7 +3,8 @@ import MySQL from '../mysql/mysql';
 const { verificaToken } = require('../server/middlewares/autenticacion');
 const router = Router();
 
-router.get('/:id', verificaToken, (req: Request, res: Response) => {
+// verificaToken,
+router.get('/:id',  (req: Request, res: Response) => {
     // return res.json({usuario: req.usuario});
 
     const id = req.params.id;

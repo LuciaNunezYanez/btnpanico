@@ -7,9 +7,11 @@ const router = Router();
 // Log in
 router.post('/', (req: Request, res: Response) => {
 
+    
     const usuario = MySQL.instance.cnn.escape(req.body.usuario);
-    const passNoEnctrip = req.body.contrasenia;
+    const passNoEnctrip = req.body.contrasena;
     const query = `CALL getUsuarioCCID(${usuario})`;
+    
 
     MySQL.ejecutarQuery(query, (err: any, data: any[][]) => {
         try{ 

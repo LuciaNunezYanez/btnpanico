@@ -1,5 +1,5 @@
 import MySQL from './mysql';
-
+import { Alerta } from '../sockets/sockets';
 
 function obtenerAlertasPendientes( callback: Function){
     const query = `CALL getReportesPend();`;
@@ -19,9 +19,12 @@ function obtenerAlertasPendientes( callback: Function){
     });
 }
 
-function abrirPeticion(idReporte: number, idUsuarioNIT: number, callback: Function){
-    const query = `CALL editEstatusReporte(${idReporte}, ${idUsuarioNIT}, 1, @nuevo_estatus);`;
-    MySQL.ejecutarQuery(query, (err: any, respuesta: any) =>{
+function abrirPeticion( alerta: Alerta, callback: Function){
+    const { id_reporte, estatus_actual ,id_user_cc} = alerta;
+
+    if(estatus_actual === 0){
+        const query = `update reporte set id_user_cc = ${id_user_cc}, estatus_actual = 1 where id_reporte = ${id_reporte}`;
+        MySQL.ejecutarQuery(query, (err: any, respuesta: any) =>{
         if(err) {
             callback({
                 ok: false,
@@ -34,6 +37,13 @@ function abrirPeticion(idReporte: number, idUsuarioNIT: number, callback: Functi
              });
         }
     });
+    } else {
+        callback(null, {
+            ok: false, 
+            err: 'La alerta ya fue atendida por otro usuario. '
+        });
+    }
+    
 }
 
 module.exports = {

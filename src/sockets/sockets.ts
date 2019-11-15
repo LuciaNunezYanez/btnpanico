@@ -1,10 +1,11 @@
 import { Socket } from 'socket.io';
 import express = require('express');
-const { verificaToken } = require('../server/middlewares/autenticacion');
 import MySQL from '../mysql/mysql';
+
+const { obtenerAlertasPendientes } = require('../mysql/mysql-alertas.nit');
+const { verificaToken } = require('../server/middlewares/autenticacion');
 const { Usuarios }  = require('../server/classes/usuarios');
 const { Alertas }  = require('../server/classes/alertas');
-const { obtenerAlertasPendientes, abrirPeticion } = require('../mysql/mysql-alertas');
 
 const usuarios = new Usuarios();
 const alertas = new Alertas();
@@ -45,56 +46,10 @@ export const CONECTADO = (cliente: Socket) => {
             if(err){
                 // Deberia de mostrar una pantalla de alerta
                 console.log(err);
-
             } else {
                 cliente.emit('alertasActualizadas', alertas);
             }
         });
-    });
-
-    cliente.on('peticionAbierta', (data: any, callback: Function) => {
-        if(!data.idReporte || !Number.isInteger(data.idReporte)){
-            return callback({
-                ok: false, 
-                resp: 'El folio del reporte es inválido.'
-            });
-        } else if(!data.idUsuario || !Number.isInteger(data.idUsuario)){
-            return callback({
-                ok: false, 
-                resp: 'El usuario es inválido.'
-            });
-        }
-
-        abrirPeticion(data.idReporte, data.idUsuario, ( err: any, resp: any) => {
-            if (err){
-                // Deberia de mostrar una pantalla de alerta de error al abrir petición 
-                return callback({
-                    ok: false, 
-                    resp: err
-                });
-            } else {
-                // Mandar lista actualizada a todos los usuarios 
-                obtenerAlertasPendientes( (err: any, alertas: Object) => {
-                    if(err){
-                        // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
-                        return callback({
-                            ok: false, 
-                            resp: err
-                        });
-        
-                    } else {
-                        cliente.emit('alertasActualizadas', alertas);
-                        callback(null, {
-                            ok: true,     
-                            resp: 'Petición abierta con éxito.'
-                        })
-                    }
-                });
-            }
-
-        });
-        
-
     });
 
 
@@ -132,7 +87,6 @@ export const CONECTADO = (cliente: Socket) => {
 
         // UNIR EL USUARIO A LA SALA 
         cliente.join(sala);
-
         agregarReporte(cliente, idComercio, idUsuario, fecha );
     }
     );
@@ -144,18 +98,6 @@ export const MULTIMEDIA = (cliente: Socket) => {
     cliente.on('imagenEnviada', (data, callback) => {
         cliente.broadcast.to('NIT').emit('imagenNueva', usuarios.usuarios.getPersonasPorSala('NIT'));
     });
-}
-
-function obtenerFechaHoy(){
-    const fh = new Date();
-    let dia = fh.getDate();
-    let mes = fh.getMonth() +1 ;
-    let anio = fh.getFullYear();
-    let hora = fh.getHours();
-    let min = fh.getMinutes();
-    let seg = fh.getSeconds();
-    const fechaCompleta = `${ anio }-${ mes }-${ dia } ${ hora }:${ min }:${ seg }`;
-    return fechaCompleta;
 }
 
 
@@ -200,8 +142,6 @@ function agregarReporte(cliente: Socket, idComercio: number, idUsuario: number, 
             const reporteAgregado = id[0][0].last_id;
 
             let alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
-            //cliente.broadcast.to('NIT').emit('alertaAgregada', alertaAgregada);
-            // VA EL MISMO CODIGO DE LOGIN 
             obtenerAlertasPendientes( (err: any, alertas: Object) => {
                 if(err){
                     console.log(err);
@@ -216,3 +156,29 @@ function agregarReporte(cliente: Socket, idComercio: number, idUsuario: number, 
         }
     });
 }
+
+
+function obtenerFechaHoy(){
+    const fh = new Date();
+    let dia = fh.getDate();
+    let mes = fh.getMonth() +1 ;
+    let anio = fh.getFullYear();
+    let hora = fh.getHours();
+    let min = fh.getMinutes();
+    let seg = fh.getSeconds();
+    const fechaCompleta = `${ anio }-${ mes }-${ dia } ${ hora }:${ min }:${ seg }`;
+    return fechaCompleta;
+}
+
+export interface Alerta {
+    id_reporte: number, 
+    id_user_app: number, 
+    id_com_reporte: number,
+    estatus_actual: number,
+    id_user_cc: number, 
+    tipo: number, 
+    nombres?: string,
+    apellPat?: string, 
+    apellMat?: string, 
+    estatus?: number
+  }

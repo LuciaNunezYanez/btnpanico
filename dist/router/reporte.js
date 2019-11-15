@@ -7,7 +7,8 @@ var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
 var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var router = express_1.Router();
-router.get('/:id', verificaToken, function (req, res) {
+// verificaToken,
+router.get('/:id', function (req, res) {
     // return res.json({usuario: req.usuario});
     var id = req.params.id;
     var escapedId = mysql_1.default.instance.cnn.escape(id);
