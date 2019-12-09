@@ -4,7 +4,7 @@ const { verificaToken } = require('../server/middlewares/autenticacion');
 const router = Router();
 
 // verificaToken,
-router.get('/:id',  (req: Request, res: Response) => {
+router.get('/:id', (req: Request, res: Response) => {
     // return res.json({usuario: req.usuario});
 
     const id = req.params.id;

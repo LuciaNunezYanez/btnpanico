@@ -6,6 +6,7 @@ const { obtenerAlertasPendientes } = require('../mysql/mysql-alertas.nit');
 const { verificaToken } = require('../server/middlewares/autenticacion');
 const { Usuarios }  = require('../server/classes/usuarios');
 const { Alertas }  = require('../server/classes/alertas');
+const jwt = require('jsonwebtoken');
 
 const usuarios = new Usuarios();
 const alertas = new Alertas();
@@ -17,26 +18,68 @@ export const CONECTADO = (cliente: Socket) => {
     // USUARIOS NIT
     // ==================================
     cliente.on('loginNIT', (usuario, callback) => {
-        if(!usuario.sala) {
+        // Des-encriptar usuario para agregarlo a donde corresponde
+        
+     
+        if(!usuario || usuario === undefined){
+            return callback({
+                ok: false,
+                err: {
+                    message: 'Usuario inválido'
+                }
+            });
+        }
+        
+        let token = usuario.token;
+        let sala = usuario.sala;
+        const SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
+        
+        let usuario_desenc: any;
+        jwt.verify(token, SEED, (err: any, decoded: any)=> {
+            if(err){
+                return callback({
+                    ok: false,
+                    err: {
+                        message: 'Token invalido'
+                    }
+                });
+            } 
+            // INFORMACIÓN DECODIFICADA DEL USUARIO
+            usuario_desenc = decoded.usuario;
+            
+        });
+
+        if(!sala || sala === undefined) {
             return callback({
                 ok: false, 
                 mensaje: 'La sala es necesaria'
             });
         }
+        if(!usuario_desenc || usuario_desenc === undefined) {
+            return callback({
+                ok: false, 
+                mensaje: 'Token invalido'
+            });
+        }
+        
         // EL USUARIO SE UNE A UNA SALA
-        cliente.join(usuario.sala);
-        console.log(`(loginNIT) Usuario ${usuario.usuario} conectado a la sala ${usuario.sala}: `);
+        cliente.join(sala);
+        console.log(`(loginNIT) Usuario ${usuario_desenc.usuario} conectado a la sala ${sala}: `);
+        
         // AGREGA EL USUARIO A LA LISTA DE PERSONAS CONECTADAS 
         let usuariosNITConectados = usuarios.agregarUsuario(
                         cliente.id, 
-                        usuario.usuario, 
-                        usuario.nombre, 
-                        usuario.sala,
-                        usuario.apePat, 
-                        usuario.apeMat, 
-                        usuario.tipo, 
-                        usuario.depend,
-                        usuario.sexo);
+                        usuario_desenc.id_usuario,
+                        usuario_desenc.usuario, 
+                        sala,
+                        usuario_desenc.nombres, 
+                        usuario_desenc.apellPat, 
+                        usuario_desenc.apellMat, 
+                        usuario_desenc.tipo, 
+                        usuario_desenc.depend,
+                        usuario_desenc.sexo,
+                        usuario_desenc.estatus);
+
         // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));

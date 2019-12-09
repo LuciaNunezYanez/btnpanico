@@ -20,6 +20,39 @@ var verificaToken = function (req, res, next) {
     });
 };
 // ========================
+// VERIFICAR TOKEN IMAGEN
+// Compara el id_usuario_pertenece
+// VS el id_usuario
+// ========================
+var verificaTokenPertenece = function (req, res, next) {
+    var token = req.query.token;
+    var id_usuario_pertenece = Number.parseInt(req.query.id_usuario_pertenece);
+    var SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
+    jwt.verify(token, SEED, function (err, decoded) {
+        if (err) {
+            return res.status(401).json({
+                ok: false,
+                err: {
+                    message: 'Token no válido'
+                }
+            });
+        }
+        // INFORMACIÓN DECODIFICADA DEL USUARIO
+        var usuario = req.usuario = decoded.usuario;
+        if (usuario.id_usuario !== id_usuario_pertenece) {
+            return res.status(401).json({
+                ok: false,
+                err: {
+                    message: 'Permiso denegado'
+                }
+            });
+        }
+        else {
+            next();
+        }
+    });
+};
+// ========================
 // VERIFICAR ADMIN ROLE 
 // 0 = Usuario normal
 // 1 = Usuario administrador
@@ -40,5 +73,6 @@ var verificaAdmin_role = function (req, res, next) {
 };
 module.exports = {
     verificaToken: verificaToken,
-    verificaAdmin_role: verificaAdmin_role
+    verificaAdmin_role: verificaAdmin_role,
+    verificaTokenPertenece: verificaTokenPertenece
 };

@@ -36,10 +36,10 @@ router.post('/', function (req, res) {
     // Quizá quitando el escape
     var contrEncript = bcrypt.hashSync(contrasena, salt);
     contrEncript = mysql_1.default.instance.cnn.escape(contrEncript);
-    var nombre = mysql_1.default.instance.cnn.escape(req.body.nombre);
-    var apePat = mysql_1.default.instance.cnn.escape(req.body.apePat);
-    var apeMat = mysql_1.default.instance.cnn.escape(req.body.apeMat) || '';
-    var usuario = mysql_1.default.instance.cnn.escape(req.body.id);
+    var nombre = mysql_1.default.instance.cnn.escape(req.body.nombres);
+    var apePat = mysql_1.default.instance.cnn.escape(req.body.apellPat);
+    var apeMat = mysql_1.default.instance.cnn.escape(req.body.apellMat) || '';
+    var usuario = mysql_1.default.instance.cnn.escape(req.body.usuario);
     var tipoUsuario = req.body.tipo;
     var depend = mysql_1.default.instance.cnn.escape(req.body.depend);
     var sexo = mysql_1.default.instance.cnn.escape(req.body.sexo);

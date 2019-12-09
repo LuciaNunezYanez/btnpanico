@@ -23,6 +23,7 @@ router.post('/', (req: Request, res: Response) => {
             } else {
                 let { 
                     id_usuarios_cc,
+                    usuario,
                     nombres_usuarios_cc , 
                     apellido_paterno, 
                     apellido_materno, 
@@ -38,10 +39,11 @@ router.post('/', (req: Request, res: Response) => {
                         resp: 'Usuario inactivo'
                     });
                 }
-                const usuario = {
+                const usuario_log = {
                     id_usuario: id_usuarios_cc,
+                    usuario: usuario,
                     nombres: nombres_usuarios_cc , 
-                    epellPat: apellido_paterno, 
+                    apellPat: apellido_paterno, 
                     apellMat: apellido_materno, 
                     tipo: tipo_usuario, 
                     depend: dependencia, 
@@ -50,9 +52,9 @@ router.post('/', (req: Request, res: Response) => {
 
                 //GENERAR TOKEN
                 let token = jwt.sign({
-                    usuario: usuario
+                    usuario: usuario_log
                 }, process.env.SEED || 'este-es-el-seed-de-desarrollo', 
-                { expiresIn: 60 * 60 * 24 });
+                { expiresIn: 60 * 60 * 24 }); // 24 hrs de expiración 
                 
                 // VALIDAR INICIO DE SESIÓN 
                 const passEncript = data[0][0].contrasena;
@@ -60,7 +62,7 @@ router.post('/', (req: Request, res: Response) => {
                     return res.json({
                         ok: true, 
                         resp: 'Contraseña exitosa', 
-                        //usuario: { usuario },
+                        usuario: { usuario },
                         token
                     });
                 }else{

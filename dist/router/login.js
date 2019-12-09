@@ -22,7 +22,7 @@ router.post('/', function (req, res) {
                 });
             }
             else {
-                var _a = data[0][0], id_usuarios_cc = _a.id_usuarios_cc, nombres_usuarios_cc = _a.nombres_usuarios_cc, apellido_paterno = _a.apellido_paterno, apellido_materno = _a.apellido_materno, tipo_usuario = _a.tipo_usuario, dependencia = _a.dependencia, sexo_cc = _a.sexo_cc, estatus_usuario = _a.estatus_usuario;
+                var _a = data[0][0], id_usuarios_cc = _a.id_usuarios_cc, usuario_1 = _a.usuario, nombres_usuarios_cc = _a.nombres_usuarios_cc, apellido_paterno = _a.apellido_paterno, apellido_materno = _a.apellido_materno, tipo_usuario = _a.tipo_usuario, dependencia = _a.dependencia, sexo_cc = _a.sexo_cc, estatus_usuario = _a.estatus_usuario;
                 // VALIDAR USUARIO ACTIVO 
                 if (estatus_usuario === 0) {
                     return res.json({
@@ -30,10 +30,11 @@ router.post('/', function (req, res) {
                         resp: 'Usuario inactivo'
                     });
                 }
-                var usuario_1 = {
+                var usuario_log = {
                     id_usuario: id_usuarios_cc,
+                    usuario: usuario_1,
                     nombres: nombres_usuarios_cc,
-                    epellPat: apellido_paterno,
+                    apellPat: apellido_paterno,
                     apellMat: apellido_materno,
                     tipo: tipo_usuario,
                     depend: dependencia,
@@ -42,15 +43,15 @@ router.post('/', function (req, res) {
                 };
                 //GENERAR TOKEN
                 var token = jwt.sign({
-                    usuario: usuario_1
-                }, process.env.SEED || 'este-es-el-seed-de-desarrollo', { expiresIn: 60 * 60 * 24 });
+                    usuario: usuario_log
+                }, process.env.SEED || 'este-es-el-seed-de-desarrollo', { expiresIn: 60 * 60 * 24 }); // 24 hrs de expiración 
                 // VALIDAR INICIO DE SESIÓN 
                 var passEncript = data[0][0].contrasena;
                 if (bcrypt.compareSync(passNoEnctrip, passEncript)) {
                     return res.json({
                         ok: true,
                         resp: 'Contraseña exitosa',
-                        //usuario: { usuario },
+                        usuario: { usuario: usuario_1 },
                         token: token
                     });
                 }

@@ -11,34 +11,41 @@ class Usuarios {
         this.usuarios = [];
 
     }
+    // id = folio del socket
+    // usuario = correo
+    // 
 
-    agregarUsuario(id:any, 
-        usuario: string, 
-        nombre: string,
+    agregarUsuario(id_socket:any, 
+        id_usuario: number,
+        usuario_correo: string, 
         sala: string, 
+        nombres: string,
         apePat?: string, 
         apeMat?: string, 
         tipo?: string, 
         depend?: string, 
-        sexo?: string) {
+        sexo?: string, 
+        estatus?: number) {
 
         let persona = { 
-            id, // ID DEL SOCKET 
-            usuario,
-            nombre,
+            id_socket, // ID DEL SOCKET 
+            id_usuario,
+            usuario_correo,
             sala,
+            nombres,
             apePat, 
             apeMat,
             tipo, 
             depend, 
-            sexo};
+            sexo,
+            estatus };
         this.usuarios.push(persona);
         return this.usuarios;
     }
 
-    getPersona(id: any) {
+    getPersona(id_socket: any) {
         let persona = this.usuarios.filter((persona: any) => {
-            return persona.id === id;
+            return persona.id_socket === id_socket;
         })[0];
 
         return persona;
@@ -55,11 +62,11 @@ class Usuarios {
         return usuariosEnSala;
     }
 
-    borrarPersona(id: string) {
-        let personaBorrada = this.getPersona(id);
+    borrarPersona(id_socket: string) {
+        let personaBorrada = this.getPersona(id_socket);
 
         this.usuarios = this.usuarios.filter((persona: any) => {
-            return persona.id != id
+            return persona.id_socket != id_socket
         })
 
         return personaBorrada;

@@ -25,8 +25,6 @@ router.get('/' , verificaToken, (req: Request, res: Response) =>{
 // Comercio y dirección 
 // verificaToken,
 router.get('/:id', (req: Request, res: Response) =>{
-    console.log(`El id de comercio que recibi es: ${req.params.id}`);
-    // return;
     const id = req.params.id;
     const escapedId = MySQL.instance.cnn.escape( id );
     const query = `CALL getComercioID(${escapedId})`;

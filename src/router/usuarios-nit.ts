@@ -38,10 +38,10 @@ router.post('/',(req: Request, res: Response) => {
     let contrEncript = bcrypt.hashSync(contrasena, salt);
     contrEncript = MySQL.instance.cnn.escape(contrEncript);
 
-    let nombre: string = MySQL.instance.cnn.escape(req.body.nombre);
-    let apePat: string = MySQL.instance.cnn.escape(req.body.apePat);
-    let apeMat: string = MySQL.instance.cnn.escape(req.body.apeMat) || '';
-    let usuario: string = MySQL.instance.cnn.escape(req.body.id);
+    let nombre: string = MySQL.instance.cnn.escape(req.body.nombres);
+    let apePat: string = MySQL.instance.cnn.escape(req.body.apellPat);
+    let apeMat: string = MySQL.instance.cnn.escape(req.body.apellMat) || '';
+    let usuario: string = MySQL.instance.cnn.escape(req.body.usuario);
     let tipoUsuario: number = req.body.tipo;
     let depend: string = MySQL.instance.cnn.escape(req.body.depend);
     let sexo: string = MySQL.instance.cnn.escape(req.body.sexo);
@@ -71,7 +71,6 @@ router.post('/',(req: Request, res: Response) => {
                 resp: req.body.id
             });
         }
-
     })
 
 });

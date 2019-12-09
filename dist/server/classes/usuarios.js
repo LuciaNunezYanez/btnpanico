@@ -7,24 +7,29 @@ var Usuarios = /** @class */ (function () {
         this.usuarios = [];
         this.usuarios = [];
     }
-    Usuarios.prototype.agregarUsuario = function (id, usuario, nombre, sala, apePat, apeMat, tipo, depend, sexo) {
+    // id = folio del socket
+    // usuario = correo
+    // 
+    Usuarios.prototype.agregarUsuario = function (id_socket, id_usuario, usuario_correo, sala, nombres, apePat, apeMat, tipo, depend, sexo, estatus) {
         var persona = {
-            id: id,
-            usuario: usuario,
-            nombre: nombre,
+            id_socket: id_socket,
+            id_usuario: id_usuario,
+            usuario_correo: usuario_correo,
             sala: sala,
+            nombres: nombres,
             apePat: apePat,
             apeMat: apeMat,
             tipo: tipo,
             depend: depend,
-            sexo: sexo
+            sexo: sexo,
+            estatus: estatus
         };
         this.usuarios.push(persona);
         return this.usuarios;
     };
-    Usuarios.prototype.getPersona = function (id) {
+    Usuarios.prototype.getPersona = function (id_socket) {
         var persona = this.usuarios.filter(function (persona) {
-            return persona.id === id;
+            return persona.id_socket === id_socket;
         })[0];
         return persona;
     };
@@ -37,10 +42,10 @@ var Usuarios = /** @class */ (function () {
         });
         return usuariosEnSala;
     };
-    Usuarios.prototype.borrarPersona = function (id) {
-        var personaBorrada = this.getPersona(id);
+    Usuarios.prototype.borrarPersona = function (id_socket) {
+        var personaBorrada = this.getPersona(id_socket);
         this.usuarios = this.usuarios.filter(function (persona) {
-            return persona.id != id;
+            return persona.id_socket != id_socket;
         });
         return personaBorrada;
     };

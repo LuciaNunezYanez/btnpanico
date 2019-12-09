@@ -17,6 +17,8 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
     const imagen: string = req.body.imagen;
     const nameArchivo = generarNombreArchivo(fechaHora, idReporte);
 
+    console.log("La fecha de foto: " + fechaHora);
+
     if (idReporte === 0) {
         return res.status(400).json({
             ok: false, 
@@ -62,7 +64,73 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
           return res.json({
               ok: true, 
               message: '¡Archivo subido correctamente!',
-              idMultimedia: idMultimedia[0][0]
+            //   idMultimedia: idMultimedia[0][0]
+          });
+      }
+  });
+});
+
+// POST PARA AUDIO
+app.post('/audio/:reporte', function(req: any, res: any) {
+    const idReporte: number = req.params.reporte;
+    const fechaHora: string = req.body.fecha;
+    const audio: string = req.body.audio;
+    const parte: number = req.body.parte;
+    
+    // console.log("Recibi la informacion de audio: " + audio);
+    console.log("La fecha de audio: " + fechaHora);
+    // console.log("Recibi la informacion de reporte: " + imagen.length);
+
+    const nameArchivo = generarNombreAudio(fechaHora, idReporte, parte, "mp3")
+
+    if (idReporte === 0) {
+        return res.status(400).json({
+            ok: false, 
+            err: {
+                message: 'Reporte invalido'
+            }
+        });
+    }
+
+    if ( audio === undefined) {
+        return res.status(400).json({
+            ok: false, 
+            err: {
+                message: 'No se seleccionó ningún archivo'
+            }
+        });
+    }
+
+    // Grabar archivo en la ruta del servidor 
+    try{
+        let ruta = `multimedia/audios/${nameArchivo}`;
+        let buffer = Buffer.from(audio.replace('data:audio/ogg; codecs=opus;base64,', ''), 'base64')
+        fs.writeFileSync(ruta, buffer);
+    } catch(err){
+        return res.status(400).json({
+            ok: false, 
+            err: {
+                message: 'Ocurrió un error al grabar archivo'
+            }
+        });
+    }    
+    
+    
+    // Registra el archivo en la base de datos
+    const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'audio','audios/${nameArchivo}',${idReporte},@last_id)`;
+    
+    MySQL.ejecutarQuery( QUERY, (err: any, idMultimedia: Object[][]) => {
+      if(err) {
+          return res.status(400).json({
+              ok: false, 
+              error: err,
+              class: 'uploads'
+          });
+      } else {
+          return res.json({
+              ok: true, 
+              message: '¡Archivo subido correctamente!',
+            //   idMultimedia: idMultimedia[0][0]
           });
       }
   });
@@ -80,6 +148,21 @@ function generarNombreArchivo(fechaHora:string, idReporte:number){
     let DMY =`D${ fechaSeparada[2] }M${ fechaSeparada[1] }Y${ fechaSeparada[0] }`;
     let HNS =`D${ horaSeparada[0] }M${ horaSeparada[1] }Y${ horaSeparada[2] }`;
     const nameArchivo = `${ idReporte }-${ DMY }${ HNS }.JPEG`
+    return nameArchivo;
+}
+
+function generarNombreAudio(fechaHora:string, idReporte:number, parte:number, extension:string){
+    // Obtener fecha y hora
+    let date = fechaHora.split(' ');
+    let fecha = date[0];
+    let fechaSeparada = fecha.split('-');
+    let hora = date[ date.length -1 ];
+    let horaSeparada = hora.split(':');
+
+    // Configurar nombre del archivo
+    let DMY =`D${ fechaSeparada[2] }M${ fechaSeparada[1] }Y${ fechaSeparada[0] }`;
+    let HNS =`D${ horaSeparada[0] }M${ horaSeparada[1] }Y${ horaSeparada[2] }`;
+    const nameArchivo = `${ idReporte }-${ DMY }${ HNS }_${parte}.${extension}`
     return nameArchivo;
 }
 

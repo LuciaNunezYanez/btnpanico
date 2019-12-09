@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
+import { verify } from 'crypto';
 const jwt = require('jsonwebtoken');
 
 // ========================
 // VERIFICACION DEL TOKEN 
 // ========================
 const verificaToken = (req: any, res: Response, next: any) => {
-    
     let token = req.get('token');
+
     const SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
     jwt.verify(token, SEED, (err: any, decoded: any)=> {
         if(err){
@@ -18,6 +19,41 @@ const verificaToken = (req: any, res: Response, next: any) => {
         // INFORMACIÓN DECODIFICADA DEL USUARIO
         req.usuario = decoded.usuario;
         next();
+    });
+};
+
+
+// ========================
+// VERIFICAR TOKEN IMAGEN
+// Compara el id_usuario_pertenece
+// VS el id_usuario
+// ========================
+const verificaTokenPertenece = (req: any, res: Response, next: any) => {
+    let token = req.query.token;
+    let id_usuario_pertenece = Number.parseInt(req.query.id_usuario_pertenece);
+    const SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
+
+    jwt.verify(token, SEED, (err: any, decoded: any) => {
+          if(err){
+            return res.status(401).json({
+                ok: false, 
+                err: {
+                    message: 'Token no válido'
+                }
+            });
+        } 
+        // INFORMACIÓN DECODIFICADA DEL USUARIO
+        let usuario = req.usuario = decoded.usuario;
+        if(usuario.id_usuario !== id_usuario_pertenece){
+            return res.status(401).json({
+                ok: false, 
+                err: {
+                    message: 'Permiso denegado'
+                }
+            });
+        } else {
+            next();
+        }
     });
 };
 
@@ -43,5 +79,6 @@ const verificaAdmin_role = (req: any, res: Response, next: any) => {
 
 module.exports = {
     verificaToken, 
-    verificaAdmin_role
+    verificaAdmin_role,
+    verificaTokenPertenece
 }

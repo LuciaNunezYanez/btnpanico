@@ -29,8 +29,6 @@ router.get('/', verificaToken, function (req, res) {
 // Comercio y dirección 
 // verificaToken,
 router.get('/:id', function (req, res) {
-    console.log("El id de comercio que recibi es: " + req.params.id);
-    // return;
     var id = req.params.id;
     var escapedId = mysql_1.default.instance.cnn.escape(id);
     var query = "CALL getComercioID(" + escapedId + ")";
