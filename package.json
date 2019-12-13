@@ -24,7 +24,7 @@
         "hbs": "^4.0.5",
         "jsonwebtoken": "^8.5.1",
         "mysql": "github:mysqljs/mysql",
-        "npm": "^6.12.0",
+        "npm": "^6.13.4",
         "socket.io": "^2.3.0"
     },
     "devDependencies": {
