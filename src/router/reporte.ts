@@ -44,7 +44,6 @@ router.post('/', verificaToken, (req: Request, res: Response) => {
     const estatusActual: number = req.body.estatus || 0; // 0 = Sin atender
     const cierreConcl: string = MySQL.instance.cnn.escape(req.body.cierre || '');
 
-    console.log('XD');
 
     const query = `CALL addReporteRtID(
                     ${idUserCc},

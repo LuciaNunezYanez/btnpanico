@@ -1,7 +1,11 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
+
 import MySQL from '../mysql/mysql';
+import Server from '../server/server';
+
+const socketServer = Server.instance;
 const app = express();
 
 // Opciones predeterminadas
@@ -11,12 +15,14 @@ app.use( fileUpload({ useTempFiles: true }) );
 // codificados en Base64 
 // NO recibe archivos sin codificar 
 
+
 app.post('/imagenes/:reporte', function(req: any, res: any) {
     const idReporte: number = req.params.reporte;
     const fechaHora: string = req.body.fecha;
     const imagen: string = req.body.imagen;
     const nameArchivo = generarNombreArchivo(fechaHora, idReporte);
-
+    
+    let ruta;
     console.log("La fecha de foto: " + fechaHora);
 
     if (idReporte === 0) {
@@ -40,7 +46,7 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
     // Grabar archivo en la ruta del servidor 
     try{
         let buffer = Buffer.from(imagen, 'base64');
-        let ruta = `multimedia/imagenes/${nameArchivo}`;
+        ruta = `multimedia/imagenes/${nameArchivo}`;
         fs.writeFileSync(ruta, buffer);
     } catch(err){
         return res.status(400).json({
@@ -51,6 +57,7 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
         });
     }    
 
+    var id_multimedia;
     // Registra el archivo en la base de datos
     const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'imagen','imagenes/${nameArchivo}',${idReporte},@last_id)`;
     MySQL.ejecutarQuery( QUERY, (err: any, idMultimedia: Object[][]) => {
@@ -61,13 +68,24 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
               class: 'uploads'
           });
       } else {
+          id_multimedia = idMultimedia[0][0];
           return res.json({
               ok: true, 
               message: '¡Archivo subido correctamente!',
-            //   idMultimedia: idMultimedia[0][0]
           });
       }
   });
+    
+    // const ruta_mult = ;
+    // Emitir a lo usuarios nueva imagen recibida 
+    socketServer.emitirNuevaImagen(idReporte, {
+        id_multimedia, 
+        fechahora_captura: fechaHora,
+        tipo_archivo: 'imagen',
+        ruta: ruta.replace('multimedia/',''), 
+        id_reporte_mult: idReporte
+    });
+  
 });
 
 // POST PARA AUDIO
@@ -76,7 +94,8 @@ app.post('/audio/:reporte', function(req: any, res: any) {
     const fechaHora: string = req.body.fecha;
     const audio: string = req.body.audio;
     const parte: number = req.body.parte;
-    
+    let ruta;
+
     // console.log("Recibi la informacion de audio: " + audio);
     console.log("La fecha de audio: " + fechaHora);
     // console.log("Recibi la informacion de reporte: " + imagen.length);
@@ -103,7 +122,7 @@ app.post('/audio/:reporte', function(req: any, res: any) {
 
     // Grabar archivo en la ruta del servidor 
     try{
-        let ruta = `multimedia/audios/${nameArchivo}`;
+        ruta = `multimedia/audios/${nameArchivo}`;
         let buffer = Buffer.from(audio.replace('data:audio/ogg; codecs=opus;base64,', ''), 'base64')
         fs.writeFileSync(ruta, buffer);
     } catch(err){
@@ -118,7 +137,8 @@ app.post('/audio/:reporte', function(req: any, res: any) {
     
     // Registra el archivo en la base de datos
     const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'audio','audios/${nameArchivo}',${idReporte},@last_id)`;
-    
+
+    let id_multimedia;
     MySQL.ejecutarQuery( QUERY, (err: any, idMultimedia: Object[][]) => {
       if(err) {
           return res.status(400).json({
@@ -127,6 +147,7 @@ app.post('/audio/:reporte', function(req: any, res: any) {
               class: 'uploads'
           });
       } else {
+          id_multimedia = idMultimedia[0][0];
           return res.json({
               ok: true, 
               message: '¡Archivo subido correctamente!',
@@ -134,6 +155,16 @@ app.post('/audio/:reporte', function(req: any, res: any) {
           });
       }
   });
+
+    const data = {
+        id_multimedia, 
+        fechahora_captura: fechaHora,
+        tipo_archivo: 'audio',
+        ruta: ruta.replace('multimedia/',''), 
+        id_reporte_mult: idReporte
+    }
+   // Emitir a lo usuarios nueva imagen recibida 
+   socketServer.emitirNuevoAudio(idReporte, data);
 });
 
 function generarNombreArchivo(fechaHora:string, idReporte:number){

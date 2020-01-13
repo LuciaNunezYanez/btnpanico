@@ -45,4 +45,26 @@ router.get('/:id', (req: Request, res: Response) =>{
     });
 });
 
+router.get('/folio/:folio', (req: Request, res: Response) =>{
+    const folio = req.params.folio;
+    const escapedFolio =  MySQL.instance.cnn.escape(folio);
+    const query = `CALL getComercioFolio(${escapedFolio})`;
+
+    MySQL.ejecutarQuery( query, (err: any, comercio: Object[][]) => {
+        console.log(Object);
+        if(err) {
+            return res.status(400).json({
+                ok: false, 
+                error: err
+            });
+        } else {
+            return res.json({
+                ok: true,
+                comercio: comercio[0][0]            
+            });
+            
+        }
+    });
+});
+
 export default router;

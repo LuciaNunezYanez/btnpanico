@@ -84,7 +84,6 @@ export const CONECTADO = (cliente: Socket) => {
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));
 
-
         obtenerAlertasPendientes( (err: any, alertas: Object) => {
             if(err){
                 // Deberia de mostrar una pantalla de alerta

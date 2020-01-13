@@ -5,12 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var router = express_1.Router();
-// Obtener todos los comercios
-router.get('/', verificaToken, function (req, res) {
-    var query = " SELECT * FROM comercio; ";
-    mysql_1.default.ejecutarQuery(query, function (err, comercios) {
+router.get('/clasificacion', function (req, res) {
+    var query = 'CALL getClasificacion()';
+    mysql_1.default.ejecutarQuery(query, function (err, clasificacion) {
+        var misClasificaciones = clasificacion[0];
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -20,19 +19,15 @@ router.get('/', verificaToken, function (req, res) {
         else {
             return res.json({
                 ok: true,
-                comercios: comercios
+                clasificacion: misClasificaciones
             });
         }
     });
 });
-// Obtener datos completos del comercio por ID 
-// Comercio y dirección 
-// verificaToken,
-router.get('/:id', function (req, res) {
-    var id = req.params.id;
-    var escapedId = mysql_1.default.instance.cnn.escape(id);
-    var query = "CALL getComercioID(" + escapedId + ")";
-    mysql_1.default.ejecutarQuery(query, function (err, comercio) {
+router.get('/subclasificacion', function (req, res) {
+    var query = 'CALL getSubclasificacion()';
+    mysql_1.default.ejecutarQuery(query, function (err, subclasificacion) {
+        var misSublasificaciones = subclasificacion[0];
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -42,17 +37,15 @@ router.get('/:id', function (req, res) {
         else {
             return res.json({
                 ok: true,
-                comercio: comercio[0]
+                subclasificacion: misSublasificaciones
             });
         }
     });
 });
-router.get('/folio/:folio', function (req, res) {
-    var folio = req.params.folio;
-    var escapedFolio = mysql_1.default.instance.cnn.escape(folio);
-    var query = "CALL getComercioFolio(" + escapedFolio + ")";
-    mysql_1.default.ejecutarQuery(query, function (err, comercio) {
-        console.log(Object);
+router.get('/incidentes', function (req, res) {
+    var query = 'CALL getIncidentes()';
+    mysql_1.default.ejecutarQuery(query, function (err, incidentes) {
+        var misIncidentes = incidentes[0];
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -62,7 +55,7 @@ router.get('/folio/:folio', function (req, res) {
         else {
             return res.json({
                 ok: true,
-                comercio: comercio[0][0]
+                incidentes: misIncidentes
             });
         }
     });

@@ -2,13 +2,19 @@ import Server from './server/server';
 import comercios from './router/comercio';
 import reporte from './router/reporte';
 import multimedia from './router/multimedia';
-import imagenes from './router/imagenes';
+import imagenes from './router/multimedia/imagenes';
+import audios from './router/multimedia/audios';
 import notas from './router/nota';
 import usuariosNit from './router/usuarios-nit';
 import alertas from './router/alertas';
 import login from './router/login';
 import uploads from './router/uploads';
 import usuarioscomercios from './router/usuarios-comercios';
+import incidentes from './router/incidentes';
+import registrocomercios from './router/registro-comercios/registro-comercios';
+import estados from './router/estados/estados';
+import municipios from './router/estados/municipios';
+import localidades from './router/estados/localidades';
 
 import bodyParser from 'body-parser';
 var cors = require('cors');
@@ -37,13 +43,18 @@ server.app.use('/comercio', comercios);
 server.app.use('/reporte', reporte);
 server.app.use('/multimedia', multimedia);
 server.app.use('/imagenes', imagenes);
+server.app.use('/audios', audios);
 server.app.use('/nota', notas);
 server.app.use('/alerta', alertas);
 server.app.use('/usuarionit', usuariosNit);
 server.app.use('/login', login);
 server.app.use('/upload', uploads);
 server.app.use('/usuariocomercio', usuarioscomercios)
-
+server.app.use('/incidentes', incidentes);
+server.app.use('/registrocomercios', registrocomercios);
+server.app.use('/estados', estados);
+server.app.use('/municipios', municipios);
+server.app.use('/localidades', localidades);
 
 // MySQL get instance 
 // MySQL.instance;

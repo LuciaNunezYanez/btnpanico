@@ -32,6 +32,13 @@ export default class Server{
         return this._instance || (this._instance = new this());
     }
 
+    public emitirNuevaImagen(id_rep: number, data: Object){
+        this.io.emit(`nuevaImagen${id_rep}`, data);
+    }
+    public emitirNuevoAudio(id_rep: number, data: Object){
+        this.io.emit(`nuevoAudio${id_rep}`, data);
+    }
+
     static init(){
         return new Server();
     }

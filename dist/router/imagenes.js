@@ -7,6 +7,7 @@ var fs = require('fs');
 var path = require('path');
 router.get('/:ruta', verificaTokenPertenece, function (req, res) {
     var ruta = req.params.ruta;
+    console.log('Pasó por aquí');
     var pathImg = path.resolve(__dirname, "../../multimedia/imagenes/" + ruta);
     if (fs.existsSync(pathImg)) {
         res.sendFile(pathImg);

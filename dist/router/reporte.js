@@ -43,7 +43,6 @@ router.post('/', verificaToken, function (req, res) {
     var clasifEmerg = req.body.clasif_emerg || 0; // 0 = Normal
     var estatusActual = req.body.estatus || 0; // 0 = Sin atender
     var cierreConcl = mysql_1.default.instance.cnn.escape(req.body.cierre || '');
-    console.log('XD');
     var query = "CALL addReporteRtID(\n                    " + idUserCc + ",\n                    " + idComercReporte + ",\n                    " + idUserApp + ",\n                    " + idUnidad + ",\n                    " + fhDoc + ",\n                    " + fhAtaque + ",\n                    " + tipoInc + ",\n                    " + descripEmerg + ",\n                    " + clasifEmerg + ",\n                    " + estatusActual + ",\n                    " + cierreConcl + ",\n                    @last_id);";
     mysql_1.default.ejecutarQuery(query, function (err, id) {
         if (err) {

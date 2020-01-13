@@ -33,6 +33,12 @@ var Server = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Server.prototype.emitirNuevaImagen = function (id_rep, data) {
+        this.io.emit("nuevaImagen" + id_rep, data);
+    };
+    Server.prototype.emitirNuevoAudio = function (id_rep, data) {
+        this.io.emit("nuevoAudio" + id_rep, data);
+    };
     Server.init = function () {
         return new Server();
     };
