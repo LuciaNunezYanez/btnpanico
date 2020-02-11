@@ -32,7 +32,9 @@ var MySQL = /** @class */ (function () {
     MySQL.ejecutarQuery = function (query, callback) {
         this.instance.cnn.query(query, function (err, results, fields) {
             if (err) {
-                console.log('==== Error en Query');
+                console.log('======== Error en Query ========');
+                console.log(query);
+                console.log('================================');
                 return callback(err);
             }
             if (results.length === 0) {

@@ -45,13 +45,12 @@ router.get('/:id', (req: Request, res: Response) =>{
     });
 });
 
-router.get('/folio/:folio', (req: Request, res: Response) =>{
-    const folio = req.params.folio;
-    const escapedFolio =  MySQL.instance.cnn.escape(folio);
-    const query = `CALL getComercioFolio(${escapedFolio})`;
+router.get('/folio/:codigo_activacion', (req: Request, res: Response) =>{
+    const codigo_activacion = req.params.codigo_activacion;
+    const escapedCodigo =  MySQL.instance.cnn.escape(codigo_activacion);
+    const query = `CALL getComercioFolio(${escapedCodigo})`;
 
     MySQL.ejecutarQuery( query, (err: any, comercio: Object[][]) => {
-        console.log(Object);
         if(err) {
             return res.status(400).json({
                 ok: false, 

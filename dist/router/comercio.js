@@ -47,12 +47,11 @@ router.get('/:id', function (req, res) {
         }
     });
 });
-router.get('/folio/:folio', function (req, res) {
-    var folio = req.params.folio;
-    var escapedFolio = mysql_1.default.instance.cnn.escape(folio);
-    var query = "CALL getComercioFolio(" + escapedFolio + ")";
+router.get('/folio/:codigo_activacion', function (req, res) {
+    var codigo_activacion = req.params.codigo_activacion;
+    var escapedCodigo = mysql_1.default.instance.cnn.escape(codigo_activacion);
+    var query = "CALL getComercioFolio(" + escapedCodigo + ")";
     mysql_1.default.ejecutarQuery(query, function (err, comercio) {
-        console.log(Object);
         if (err) {
             return res.status(400).json({
                 ok: false,

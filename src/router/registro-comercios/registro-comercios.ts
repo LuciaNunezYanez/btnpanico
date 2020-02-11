@@ -46,7 +46,19 @@ router.post('/', (req: Request, res: Response) => {
 	const tipo_sangre: string = MySQL.instance.cnn.escape(body.tipo_sangre || ''); 
     const estatus_usuario: boolean = body.estatus_usuario || 1; // 1 POR DEFAULT COMO ACTIVO 
 
-    const fecha_separada = fecha_nacimiento_sucia.split('/')
+
+    // DATOS DEL USUARIO DEL NIT 
+    const id_usuario_nit: number = body.id_usuario_nit;
+    const fecha_creacion: string = body.fecha_creacion;
+
+
+    // SEPARAR LA FECHA DE CREACION (0000/00/00)
+    const fecha_creacion_separada = fecha_creacion.split('/');
+    var fecha_creacion_lista = fecha_creacion_separada[2] + '/' + fecha_creacion_separada[1] + '/' + fecha_creacion_separada[0];
+    fecha_creacion_lista = MySQL.instance.cnn.escape(fecha_creacion_lista);
+
+    // SEPARAR LA FECHA DE NACIMIENTO DEL USUARIO (0000/00/00)
+    const fecha_separada = fecha_nacimiento_sucia.split('/');
     var fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
     fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_lista);
 
@@ -80,9 +92,15 @@ router.post('/', (req: Request, res: Response) => {
         ${tipo_sangre},
         ${estatus_usuario},
 
+        ${folio_comercio}, 
+        ${fecha_creacion_lista},    
+        0, 
+        ${id_usuario_nit},
+
         @id_direccion,
         @id_comercio,
-        @id_usuarios_app);`;
+        @id_usuarios_app,
+        @id_cod_activ);`;
 
         // console.log(QUERY);
         // return;
@@ -98,7 +116,8 @@ router.post('/', (req: Request, res: Response) => {
                 ok: true, 
                 id_direccion: result[0][0].id_direccion,
                 id_comercio: result[1][0].id_comercio,
-                id_usuarios_app: result[2][0].id_usuarios_app
+                id_usuarios_app: result[2][0].id_usuarios_app,
+                id_cod_activ: result[3][0].id_cod_activ
                 // data: result
             });
         }

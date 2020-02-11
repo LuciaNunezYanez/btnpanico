@@ -41,10 +41,18 @@ router.post('/', function (req, res) {
     var alergias = mysql_1.default.instance.cnn.escape(body.alergias || '');
     var tipo_sangre = mysql_1.default.instance.cnn.escape(body.tipo_sangre || '');
     var estatus_usuario = body.estatus_usuario || 1; // 1 POR DEFAULT COMO ACTIVO 
+    // DATOS DEL USUARIO DEL NIT 
+    var id_usuario_nit = body.id_usuario_nit;
+    var fecha_creacion = body.fecha_creacion;
+    // SEPARAR LA FECHA DE CREACION (0000/00/00)
+    var fecha_creacion_separada = fecha_creacion.split('/');
+    var fecha_creacion_lista = fecha_creacion_separada[2] + '/' + fecha_creacion_separada[1] + '/' + fecha_creacion_separada[0];
+    fecha_creacion_lista = mysql_1.default.instance.cnn.escape(fecha_creacion_lista);
+    // SEPARAR LA FECHA DE NACIMIENTO DEL USUARIO (0000/00/00)
     var fecha_separada = fecha_nacimiento_sucia.split('/');
     var fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
     fecha_nacimiento_lista = mysql_1.default.instance.cnn.escape(fecha_nacimiento_lista);
-    var QUERY = "CALL addComercioCompleto(\n        " + calle + ",\n        " + numero + ",\n        " + colonia + ",\n        " + cp + ",\n        " + entre_calle_1 + ",\n        " + entre_calle_2 + ",\n        " + fachada + ",\n        " + id_localidad + ",\n        " + lat_dir + ",\n        " + lgn_dir + ",\n        \n        " + num_empleados + ",\n        " + nombre_comercio + ",\n        " + giro + ",\n        " + telefono_fijo + ",\n        " + folio_comercio + ",\n        " + razon_social + ",\n\n        " + nombres_usuarios_app + ",\n        " + apell_pat + ",\n        " + apell_mat + ",\n        " + fecha_nacimiento_lista + ",\n        " + sexo_app + ",\n        " + padecimientos + ",\n        " + tel_movil + ",\n        " + alergias + ",\n        " + tipo_sangre + ",\n        " + estatus_usuario + ",\n\n        @id_direccion,\n        @id_comercio,\n        @id_usuarios_app);";
+    var QUERY = "CALL addComercioCompleto(\n        " + calle + ",\n        " + numero + ",\n        " + colonia + ",\n        " + cp + ",\n        " + entre_calle_1 + ",\n        " + entre_calle_2 + ",\n        " + fachada + ",\n        " + id_localidad + ",\n        " + lat_dir + ",\n        " + lgn_dir + ",\n        \n        " + num_empleados + ",\n        " + nombre_comercio + ",\n        " + giro + ",\n        " + telefono_fijo + ",\n        " + folio_comercio + ",\n        " + razon_social + ",\n\n        " + nombres_usuarios_app + ",\n        " + apell_pat + ",\n        " + apell_mat + ",\n        " + fecha_nacimiento_lista + ",\n        " + sexo_app + ",\n        " + padecimientos + ",\n        " + tel_movil + ",\n        " + alergias + ",\n        " + tipo_sangre + ",\n        " + estatus_usuario + ",\n\n        " + folio_comercio + ", \n        " + fecha_creacion_lista + ",    \n        0, \n        " + id_usuario_nit + ",\n\n        @id_direccion,\n        @id_comercio,\n        @id_usuarios_app,\n        @id_cod_activ);";
     // console.log(QUERY);
     // return;
     mysql_1.default.ejecutarQuery(QUERY, function (err, result) {
@@ -59,7 +67,8 @@ router.post('/', function (req, res) {
                 ok: true,
                 id_direccion: result[0][0].id_direccion,
                 id_comercio: result[1][0].id_comercio,
-                id_usuarios_app: result[2][0].id_usuarios_app
+                id_usuarios_app: result[2][0].id_usuarios_app,
+                id_cod_activ: result[3][0].id_cod_activ
                 // data: result
             });
         }

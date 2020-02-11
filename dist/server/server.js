@@ -39,6 +39,9 @@ var Server = /** @class */ (function () {
     Server.prototype.emitirNuevoAudio = function (id_rep, data) {
         this.io.emit("nuevoAudio" + id_rep, data);
     };
+    Server.prototype.emitirGeolocalizacion = function (id_rep, data) {
+        this.io.emit("nuevaGeolocalizacion" + id_rep, data);
+    };
     Server.init = function () {
         return new Server();
     };

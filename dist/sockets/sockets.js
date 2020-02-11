@@ -140,7 +140,7 @@ function agregarReporte(cliente, idComercio, idUsuario, fecha) {
                     cliente.broadcast.to('NIT').emit('alertasActualizadas', alertas);
                 }
             });
-            console.log("Se cre\u00F3 el reporte " + reporteAgregado);
+            console.log("Se cre\u00F3 el reporte " + reporteAgregado + " <==============");
             // Emitir a cliente android que la alerta se recibio con el # del reporte 
             cliente.emit('alertaRecibida', "" + reporteAgregado);
         }

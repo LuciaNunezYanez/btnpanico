@@ -15,6 +15,8 @@ import registrocomercios from './router/registro-comercios/registro-comercios';
 import estados from './router/estados/estados';
 import municipios from './router/estados/municipios';
 import localidades from './router/estados/localidades';
+import coordenadas from './router/coordenadas-app';
+import codigoActivacion from './router/codigo-activacion/codigo';
 
 import bodyParser from 'body-parser';
 var cors = require('cors');
@@ -55,6 +57,8 @@ server.app.use('/registrocomercios', registrocomercios);
 server.app.use('/estados', estados);
 server.app.use('/municipios', municipios);
 server.app.use('/localidades', localidades);
+server.app.use('/coordenadas', coordenadas);
+server.app.use('/codigoactivacion', codigoActivacion);
 
 // MySQL get instance 
 // MySQL.instance;
