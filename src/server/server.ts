@@ -4,7 +4,7 @@ import socketIO from 'socket.io';
 import http from 'http';
 import * as socket from '../sockets/sockets'; 
 import { Alerta } from '../sockets/sockets';
-const { obtenerAlertasPendientes, abrirPeticion } = require('../mysql/mysql-alertas.nit');
+const { obtenerAlertasPendientes, abrirPeticion, cerrarPeticion } = require('../mysql/mysql-alertas.nit');
 
 
 
@@ -71,6 +71,10 @@ export default class Server{
             // ( Moverla a un archivo donde no estorbe. ) 
             cliente.on('alertaAbierta', (data: Alerta, callback: Function) => {
 
+                // Debe tener:
+                // id_reporte
+                // id_user_cc
+               
                 if(!data.id_reporte || !Number.isInteger(data.id_reporte)){
                     return callback({
                         ok: false, 
@@ -105,6 +109,59 @@ export default class Server{
                                 callback(null, {
                                     ok: true,     
                                     resp: 'Petición abierta con éxito.'
+                                })
+                            }
+                        });
+                    }
+                });
+            });
+
+            cliente.on('alertaCerrada', (data: Alerta, callback: Function) => {
+
+                //   Debe tener:
+                // id_reporte
+                // id_user_cc
+                // estatus_actual
+                // tipo_incid
+                // descrip_emerg
+                // cierre_conclusion
+                // num_unidad
+
+               
+                if(!data.id_reporte || !Number.isInteger(data.id_reporte)){
+                    return callback({
+                        ok: false, 
+                        resp: 'El folio del reporte es inválido.'
+                    });
+                } else if(!data.id_user_cc || !Number.isInteger(data.id_user_cc)){
+                    return callback({
+                        ok: false, 
+                        resp: 'El usuario es inválido.'
+                    });
+                }
+        
+                cerrarPeticion(data, ( err: any, resp: any) => {
+                    if (err){
+                        // Deberia de mostrar una pantalla de alerta de error al cerrar petición 
+                        return callback({
+                            ok: false, 
+                            resp: err
+                        });
+                    } else {
+                        // Mandar lista actualizada a todos los usuarios 
+                        obtenerAlertasPendientes( (err: any, alertas: Object) => {
+                            if(err){
+                                // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
+                                return callback({
+                                    ok: false, 
+                                    resp: err
+                                });
+                
+                            } else {
+                                this.io.emit('alertasActualizadas', alertas);
+                                callback(null, {
+                                    ok: true,     
+                                    resp: 'Petición cerrada con éxito.'
                                 })
                             }
                         });

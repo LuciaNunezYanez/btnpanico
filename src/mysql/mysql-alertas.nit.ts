@@ -46,7 +46,50 @@ function abrirPeticion( alerta: Alerta, callback: Function){
     
 }
 
+function cerrarPeticion( data: any, callback: Function){
+    var { id_reporte, id_user_cc, estatus_actual, tipo_incid, descrip_emerg, cierre_conclusion, num_unidad} = data;
+    
+    descrip_emerg = MySQL.instance.cnn.escape(descrip_emerg);
+    cierre_conclusion = MySQL.instance.cnn.escape(cierre_conclusion);
+    num_unidad = MySQL.instance.cnn.escape(num_unidad);
+
+    // También agregar combo box de corporaciones para recibir el ID 
+    const corporacion = 4; //DESCONOCIDA 
+    const QUERY = `CALL editCerrarReporte(
+        ${ id_reporte }, 
+        ${ id_user_cc }, 
+        ${ estatus_actual }, 
+        ${ tipo_incid }, 
+        ${ descrip_emerg }, 
+        ${ cierre_conclusion }, 
+        ${ corporacion }, 
+        ${ num_unidad }
+    );`
+
+    if( estatus_actual === 1){
+        MySQL.ejecutarQuery(QUERY, (err: any, resultado: any) => {
+            if(err) {
+                callback({
+                    ok: false,
+                    err
+                });
+            } else {
+                 callback(null, {
+                     ok: true, 
+                     resultado
+                 });
+            }
+        })
+    } else {
+        callback(null, {
+            ok: false, 
+            err: 'La alerta ya fue cerrada por otro usuario. '
+        });
+    }
+}
+
 module.exports = {
     obtenerAlertasPendientes,
-    abrirPeticion
+    abrirPeticion, 
+    cerrarPeticion
 }
