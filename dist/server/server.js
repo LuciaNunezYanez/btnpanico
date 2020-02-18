@@ -42,6 +42,12 @@ var Server = /** @class */ (function () {
     Server.prototype.emitirGeolocalizacion = function (id_rep, data) {
         this.io.emit("nuevaGeolocalizacion" + id_rep, data);
     };
+    Server.prototype.emitirAlertasActualizadas = function (alertas) {
+        this.io.emit("alertasActualizadas", alertas);
+    };
+    // public emitirNuevoBotonazo(id_reporte: number, data: Object){
+    //     this.io.emit(`nuevoBotonazo${id_reporte}`, data);
+    // }
     Server.init = function () {
         return new Server();
     };
@@ -98,7 +104,7 @@ var Server = /** @class */ (function () {
                             }
                             else {
                                 _this.io.emit('alertasActualizadas', alertas);
-                                callback(null, {
+                                return callback(null, {
                                     ok: true,
                                     resp: 'Petición abierta con éxito.'
                                 });
@@ -110,22 +116,22 @@ var Server = /** @class */ (function () {
             cliente.on('alertaCerrada', function (data, callback) {
                 //   Debe tener:
                 // id_reporte
-                // id_user_cc
                 // estatus_actual
                 // tipo_incid
                 // descrip_emerg
                 // cierre_conclusion
                 // num_unidad
+                // TOKEN (VALIDAR EL # DEL USUARIO)
                 if (!data.id_reporte || !Number.isInteger(data.id_reporte)) {
                     return callback({
                         ok: false,
                         resp: 'El folio del reporte es inválido.'
                     });
                 }
-                else if (!data.id_user_cc || !Number.isInteger(data.id_user_cc)) {
+                else if (!data.token) {
                     return callback({
                         ok: false,
-                        resp: 'El usuario es inválido.'
+                        resp: 'El token es inválido, por favor inicie sesión.'
                     });
                 }
                 cerrarPeticion(data, function (err, resp) {
@@ -137,6 +143,8 @@ var Server = /** @class */ (function () {
                         });
                     }
                     else {
+                        console.log('XD');
+                        console.log(resp);
                         // Mandar lista actualizada a todos los usuarios 
                         obtenerAlertasPendientes(function (err, alertas) {
                             if (err) {
@@ -148,7 +156,7 @@ var Server = /** @class */ (function () {
                             }
                             else {
                                 _this.io.emit('alertasActualizadas', alertas);
-                                callback(null, {
+                                return callback(null, {
                                     ok: true,
                                     resp: 'Petición cerrada con éxito.'
                                 });

@@ -134,6 +134,7 @@ function agregarReporte(cliente, idComercio, idUsuario, fecha) {
             var alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
             obtenerAlertasPendientes(function (err, alertas) {
                 if (err) {
+                    console.log('Error al obtener alertas pendientes');
                     console.log(err);
                 }
                 else {

@@ -1,5 +1,6 @@
 import MySQL from './mysql';
 import { Alerta } from '../sockets/sockets';
+const { decodificarToken } = require('../server/middlewares/autenticacion');
 
 function obtenerAlertasPendientes( callback: Function){
     const query = `CALL getReportesPend();`;
@@ -47,12 +48,29 @@ function abrirPeticion( alerta: Alerta, callback: Function){
 }
 
 function cerrarPeticion( data: any, callback: Function){
-    var { id_reporte, id_user_cc, estatus_actual, tipo_incid, descrip_emerg, cierre_conclusion, num_unidad} = data;
-    
+    var { id_reporte, estatus_actual, tipo_incid, descrip_emerg, cierre_conclusion, num_unidad, token} = data;
+    var id_user_cc;
+
     descrip_emerg = MySQL.instance.cnn.escape(descrip_emerg);
     cierre_conclusion = MySQL.instance.cnn.escape(cierre_conclusion);
     num_unidad = MySQL.instance.cnn.escape(num_unidad);
+    
+    // Decodificar token 
+    const tokenDecodificado = decodificarToken(token);
 
+    if(tokenDecodificado.ok && tokenDecodificado.usuario){
+        id_user_cc = tokenDecodificado.usuario.id_usuario;
+        // console.log('EL ID DEL USUARIO ES: ' + id_user_cc);
+    } else {
+        console.log(tokenDecodificado);
+        callback({
+            ok: false,
+            err: 'El id del usuario no viene en el token'
+        });
+        return;
+        // No se si lleva el return 
+    }
+    
     // También agregar combo box de corporaciones para recibir el ID 
     const corporacion = 4; //DESCONOCIDA 
     const QUERY = `CALL editCerrarReporte(
@@ -66,6 +84,7 @@ function cerrarPeticion( data: any, callback: Function){
         ${ num_unidad }
     );`
 
+    console.log(QUERY);
     if( estatus_actual === 1){
         MySQL.ejecutarQuery(QUERY, (err: any, resultado: any) => {
             if(err) {
@@ -81,7 +100,11 @@ function cerrarPeticion( data: any, callback: Function){
             }
         })
     } else {
-        callback(null, {
+        // callback(null, {
+        //     ok: false, 
+        //     err: 'La alerta ya fue cerrada por otro usuario. '
+        // });
+        callback({
             ok: false, 
             err: 'La alerta ya fue cerrada por otro usuario. '
         });

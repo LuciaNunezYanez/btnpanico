@@ -2,8 +2,8 @@ import Server from './server/server';
 import comercios from './router/comercio';
 import reporte from './router/reporte';
 import multimedia from './router/multimedia';
-// import imagenes from './router/multimedia/imagenes';
-// import audios from './router/multimedia/audios';
+import imagenes from './router/multimedia/imagenes';
+import audios from './router/multimedia/audios';
 import notas from './router/nota';
 import usuariosNit from './router/usuarios-nit';
 import alertas from './router/alertas';
@@ -17,6 +17,7 @@ import municipios from './router/estados/municipios';
 import localidades from './router/estados/localidades';
 import coordenadas from './router/coordenadas-app';
 import codigoActivacion from './router/codigo-activacion/codigo';
+import activaciones from './router/activaciones';
 
 import bodyParser from 'body-parser';
 var cors = require('cors');
@@ -44,8 +45,8 @@ server.app.use(cors(), (req, res, next) => {
 server.app.use('/comercio', comercios);
 server.app.use('/reporte', reporte);
 server.app.use('/multimedia', multimedia);
-// server.app.use('/imagenes', imagenes);
-// server.app.use('/audios', audios);
+server.app.use('/imagenes', imagenes);
+server.app.use('/audios', audios);
 server.app.use('/nota', notas);
 server.app.use('/alerta', alertas);
 server.app.use('/usuarionit', usuariosNit);
@@ -59,6 +60,7 @@ server.app.use('/municipios', municipios);
 server.app.use('/localidades', localidades);
 server.app.use('/coordenadas', coordenadas);
 server.app.use('/codigoactivacion', codigoActivacion);
+server.app.use('/activaciones', activaciones);
 
 // MySQL get instance 
 // MySQL.instance;

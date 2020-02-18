@@ -186,6 +186,7 @@ function agregarReporte(cliente: Socket, idComercio: number, idUsuario: number, 
             let alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
             obtenerAlertasPendientes( (err: any, alertas: Object) => {
                 if(err){
+                    console.log('Error al obtener alertas pendientes');
                     console.log(err);
     
                 } else {
@@ -221,6 +222,7 @@ export interface Alerta {
     tipo: number, 
     nombres?: string,
     apellPat?: string, 
-    apellMat?: string, 
+    apellMat?: string,
+    token?: string,  
     estatus?: number
   }

@@ -62,7 +62,8 @@ router.post('/', (req: Request, res: Response) => {
                     return res.json({
                         ok: true, 
                         resp: 'Contraseña exitosa', 
-                        usuario: { usuario },
+                        id_usuario: id_usuarios_cc, 
+                        usuario,
                         token
                     });
                 }else{

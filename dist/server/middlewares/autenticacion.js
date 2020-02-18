@@ -28,6 +28,7 @@ var verificaTokenPertenece = function (req, res, next) {
     var token = req.query.token;
     var id_usuario_pertenece = Number.parseInt(req.query.id_usuario_pertenece);
     var SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
+    // NITDurango (Variable Heroku)
     jwt.verify(token, SEED, function (err, decoded) {
         if (err) {
             return res.status(401).json({
@@ -40,6 +41,10 @@ var verificaTokenPertenece = function (req, res, next) {
         // INFORMACIÓN DECODIFICADA DEL USUARIO
         var usuario = req.usuario = decoded.usuario;
         if (usuario.id_usuario !== id_usuario_pertenece) {
+            // console.log('Usuario token');
+            // console.log(usuario.id_usuario);
+            // console.log('usuario por ruta');
+            // console.log(id_usuario_pertenece);
             return res.status(401).json({
                 ok: false,
                 err: {
@@ -52,6 +57,27 @@ var verificaTokenPertenece = function (req, res, next) {
         }
     });
 };
+function decodificarToken(token) {
+    var usuario;
+    var SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
+    jwt.verify(token, SEED, function (err, decoded) {
+        if (err) {
+            // Token no valido 
+            usuario = {
+                ok: false
+            };
+        }
+        else {
+            // INFORMACIÓN DECODIFICADA DEL USUARIO
+            usuario = {
+                ok: true,
+                usuario: decoded.usuario
+            };
+        }
+    });
+    console.log(usuario);
+    return usuario;
+}
 // ========================
 // VERIFICAR ADMIN ROLE 
 // 0 = Usuario normal
@@ -74,5 +100,6 @@ var verificaAdmin_role = function (req, res, next) {
 module.exports = {
     verificaToken: verificaToken,
     verificaAdmin_role: verificaAdmin_role,
-    verificaTokenPertenece: verificaTokenPertenece
+    verificaTokenPertenece: verificaTokenPertenece,
+    decodificarToken: decodificarToken
 };

@@ -43,6 +43,14 @@ export default class Server{
     public emitirGeolocalizacion(id_rep: number, data: Object){
         this.io.emit(`nuevaGeolocalizacion${id_rep}`, data);
     }
+    
+    public emitirAlertasActualizadas(alertas: Object){
+        this.io.emit(`alertasActualizadas`, alertas)
+    }
+
+    // public emitirNuevoBotonazo(id_reporte: number, data: Object){
+    //     this.io.emit(`nuevoBotonazo${id_reporte}`, data);
+    // }
 
     static init(){
         return new Server();
@@ -106,7 +114,7 @@ export default class Server{
                 
                             } else {
                                 this.io.emit('alertasActualizadas', alertas);
-                                callback(null, {
+                                return callback(null, {
                                     ok: true,     
                                     resp: 'Petición abierta con éxito.'
                                 })
@@ -120,23 +128,24 @@ export default class Server{
 
                 //   Debe tener:
                 // id_reporte
-                // id_user_cc
                 // estatus_actual
                 // tipo_incid
                 // descrip_emerg
                 // cierre_conclusion
                 // num_unidad
+                // TOKEN (VALIDAR EL # DEL USUARIO)
 
-               
+
                 if(!data.id_reporte || !Number.isInteger(data.id_reporte)){
                     return callback({
                         ok: false, 
                         resp: 'El folio del reporte es inválido.'
                     });
-                } else if(!data.id_user_cc || !Number.isInteger(data.id_user_cc)){
+                } 
+                else if(!data.token) {
                     return callback({
                         ok: false, 
-                        resp: 'El usuario es inválido.'
+                        resp: 'El token es inválido, por favor inicie sesión.'
                     });
                 }
         
@@ -148,6 +157,8 @@ export default class Server{
                             resp: err
                         });
                     } else {
+                        console.log('XD');
+                        console.log(resp);
                         // Mandar lista actualizada a todos los usuarios 
                         obtenerAlertasPendientes( (err: any, alertas: Object) => {
                             if(err){
@@ -159,7 +170,7 @@ export default class Server{
                 
                             } else {
                                 this.io.emit('alertasActualizadas', alertas);
-                                callback(null, {
+                                return callback(null, {
                                     ok: true,     
                                     resp: 'Petición cerrada con éxito.'
                                 })

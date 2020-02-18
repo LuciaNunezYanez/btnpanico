@@ -7,8 +7,8 @@ var server_1 = __importDefault(require("./server/server"));
 var comercio_1 = __importDefault(require("./router/comercio"));
 var reporte_1 = __importDefault(require("./router/reporte"));
 var multimedia_1 = __importDefault(require("./router/multimedia"));
-// import imagenes from './router/multimedia/imagenes';
-// import audios from './router/multimedia/audios';
+var imagenes_1 = __importDefault(require("./router/multimedia/imagenes"));
+var audios_1 = __importDefault(require("./router/multimedia/audios"));
 var nota_1 = __importDefault(require("./router/nota"));
 var usuarios_nit_1 = __importDefault(require("./router/usuarios-nit"));
 var alertas_1 = __importDefault(require("./router/alertas"));
@@ -22,6 +22,7 @@ var municipios_1 = __importDefault(require("./router/estados/municipios"));
 var localidades_1 = __importDefault(require("./router/estados/localidades"));
 var coordenadas_app_1 = __importDefault(require("./router/coordenadas-app"));
 var codigo_1 = __importDefault(require("./router/codigo-activacion/codigo"));
+var activaciones_1 = __importDefault(require("./router/activaciones"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var cors = require('cors');
 var server = server_1.default.instance;
@@ -44,8 +45,8 @@ server.app.use(cors(), function (req, res, next) {
 server.app.use('/comercio', comercio_1.default);
 server.app.use('/reporte', reporte_1.default);
 server.app.use('/multimedia', multimedia_1.default);
-// server.app.use('/imagenes', imagenes);
-// server.app.use('/audios', audios);
+server.app.use('/imagenes', imagenes_1.default);
+server.app.use('/audios', audios_1.default);
 server.app.use('/nota', nota_1.default);
 server.app.use('/alerta', alertas_1.default);
 server.app.use('/usuarionit', usuarios_nit_1.default);
@@ -59,6 +60,7 @@ server.app.use('/municipios', municipios_1.default);
 server.app.use('/localidades', localidades_1.default);
 server.app.use('/coordenadas', coordenadas_app_1.default);
 server.app.use('/codigoactivacion', codigo_1.default);
+server.app.use('/activaciones', activaciones_1.default);
 // MySQL get instance 
 // MySQL.instance;
 server.start(function () {
