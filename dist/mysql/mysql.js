@@ -20,6 +20,9 @@ var MySQL = /** @class */ (function () {
         //     database: 'heroku_063696d7f49647b'
         // });
         this.conectarDB();
+        // Prueba 02/03/2020
+        // En caso de que ocurra un error, volver a realizar la conexión
+        this.cnn.on('error', this.conectarDB);
     }
     Object.defineProperty(MySQL, "instance", {
         // Evita que se creen varias instancias de la clase 

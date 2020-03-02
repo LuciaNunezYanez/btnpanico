@@ -9,6 +9,52 @@ var server_1 = __importDefault(require("../server/server"));
 var router = express_1.Router();
 var socketServer = server_1.default.instance;
 var obtenerAlertasPendientes = require('../mysql/mysql-alertas.nit').obtenerAlertasPendientes;
+router.get('/:id_reporte', function (req, res) {
+    var id_reporte = req.params.id_reporte;
+    var QUERY = "CALL getActivacionesReporte(" + id_reporte + ");";
+    mysql_1.default.ejecutarQuery(QUERY, function (err, activaciones) {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                error: err
+            });
+        }
+        else {
+            // Emitir a un usuario en especifico la hora del nuevo botonazo 
+            // if(Number.parseInt(id_reporte) >= 1){
+            //     socketServer.emitirListaBotonazos(Number.parseInt(id_reporte), { activaciones: activaciones[0] });
+            // }
+            return res.json({
+                ok: true,
+                activaciones: activaciones[0]
+            });
+        }
+    });
+});
+// Cancelar la alerta o activación
+router.put('/:id_reporte', function (req, res) {
+    var id_reporte = Number.parseInt(req.params.id_reporte);
+    var estatus = Number.parseInt(req.body.estatus);
+    var QUERY = "UPDATE reporte SET estatus_actual = " + estatus + " WHERE id_reporte = " + id_reporte + ";";
+    mysql_1.default.ejecutarQuery(QUERY, function (err, resultado) {
+        if (err) {
+            console.log('Error al modificar el estatus del reporte');
+            console.log(err);
+            return res.status(500).json({
+                ok: false,
+                err: err
+            });
+        }
+        else {
+            // console.log('Todo salió bien');
+            // console.log(resultado);
+            return res.json({
+                ok: true,
+                col_afectadas: resultado.affectedRows
+            });
+        }
+    });
+});
 // Registrar cada vez que se presiona el botón de pánico con un reporte existente generado
 router.post('/:id_reporte', function (req, res) {
     var id_reporte = Number.parseInt(req.params.id_reporte);
@@ -36,9 +82,27 @@ router.post('/:id_reporte', function (req, res) {
                             });
                         }
                         else {
-                            socketServer.emitirAlertasActualizadas(alertas);
-                            return res.json({
-                                ok: true
+                            // Emitir a todos los usuarios la lista actualizada de alertas
+                            socketServer.emitirAlertasActualizadas(alertas, 'NIT');
+                            // Una vez agregada la alerta se actualiza la lista
+                            var QUERY_1 = "CALL getActivacionesReporte(" + id_reporte + ");";
+                            mysql_1.default.ejecutarQuery(QUERY_1, function (err, activaciones) {
+                                if (err) {
+                                    console.log('Error al obtener activaciones por reporte');
+                                    console.log(err);
+                                    return res.json({
+                                        ok: false,
+                                        error: err
+                                    });
+                                }
+                                else {
+                                    // Emitir a un usuario en especifico la hora del nuevo botonazo 
+                                    socketServer.emitirListaBotonazos(id_reporte, { activaciones: activaciones[0] });
+                                    // Responder
+                                    return res.json({
+                                        ok: true
+                                    });
+                                }
                             });
                         }
                     });

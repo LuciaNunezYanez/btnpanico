@@ -115,7 +115,7 @@ export const CONECTADO = (cliente: Socket) => {
     // ========================================
     // ALERTAS COMERCIOS
     // ========================================
-    cliente.on('botonActivado', function(comercio){ 
+    /*cliente.on('botonActivado', function(comercio){ 
         const { idComercio, idUsuario , sala, fecha } = comercio;
         
         console.log(`-> Nueva alerta de pánico del comercio: ${idComercio}`);               
@@ -131,7 +131,7 @@ export const CONECTADO = (cliente: Socket) => {
         cliente.join(sala);
         agregarReporte(cliente, idComercio, idUsuario, fecha );
     }
-    );
+    );*/
 }
 
 export const MULTIMEDIA = (cliente: Socket) => {

@@ -25,6 +25,10 @@ export default class MySQL {
         // });
 
         this.conectarDB();
+        
+        // Prueba 02/03/2020
+        // En caso de que ocurra un error, volver a realizar la conexión
+        this.cnn.on('error', this.conectarDB);
     }
 
     // Evita que se creen varias instancias de la clase 
@@ -46,10 +50,8 @@ export default class MySQL {
             } else {
                 callback(null, results);
             }
-        });   
-        
+        });
     }
-
 
     private conectarDB() {
         this.cnn.connect((err: mysql.MysqlError) => {

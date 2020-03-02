@@ -44,9 +44,15 @@ export default class Server{
         this.io.emit(`nuevaGeolocalizacion${id_rep}`, data);
     }
     
-    public emitirAlertasActualizadas(alertas: Object){
-        this.io.emit(`alertasActualizadas`, alertas)
+    public emitirAlertasActualizadas(alertas: Object, sala: string){
+        this.io.to(sala).emit('alertasActualizadas', alertas);
+        // this.io.emit(`alertasActualizadas`, alertas)
     }
+
+    public emitirListaBotonazos(id_rep: number, data: Object){
+        this.io.emit(`listaBotonazos${id_rep}`, data);
+    }
+
 
     // public emitirNuevoBotonazo(id_reporte: number, data: Object){
     //     this.io.emit(`nuevoBotonazo${id_reporte}`, data);

@@ -92,15 +92,23 @@ exports.CONECTADO = function (cliente) {
     // ========================================
     // ALERTAS COMERCIOS
     // ========================================
-    cliente.on('botonActivado', function (comercio) {
-        var idComercio = comercio.idComercio, idUsuario = comercio.idUsuario, sala = comercio.sala, fecha = comercio.fecha;
-        console.log("-> Nueva alerta de p\u00E1nico del comercio: " + idComercio);
-        // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS 
-        usuarios.agregarUsuario(cliente.id, idUsuario, idComercio, sala);
-        // UNIR EL USUARIO A LA SALA 
+    /*cliente.on('botonActivado', function(comercio){
+        const { idComercio, idUsuario , sala, fecha } = comercio;
+        
+        console.log(`-> Nueva alerta de pánico del comercio: ${idComercio}`);
+
+        // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS
+        usuarios.agregarUsuario(
+            cliente.id,
+            idUsuario,
+            idComercio,
+            sala);
+
+        // UNIR EL USUARIO A LA SALA
         cliente.join(sala);
-        agregarReporte(cliente, idComercio, idUsuario, fecha);
-    });
+        agregarReporte(cliente, idComercio, idUsuario, fecha );
+    }
+    );*/
 };
 exports.MULTIMEDIA = function (cliente) {
     console.log("-> ARCHIVO MULTIMEDIA RECIBIDO");
