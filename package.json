@@ -27,7 +27,7 @@
         "hbs": "^4.0.5",
         "jsonwebtoken": "^8.5.1",
         "mysql": "github:mysqljs/mysql",
-        "nodemailer": "^6.4.10",
+        "nodemailer": "^6.4.16",
         "npm": "^6.12.0",
         "ol": "^6.5.0",
         "parse-kml": "^1.0.1",
