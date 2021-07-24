@@ -18,8 +18,11 @@ var socket = __importStar(require("../sockets/sockets"));
 var _a = require('../mysql/mysql-alertas.nit'), obtenerAlertasPendientes = _a.obtenerAlertasPendientes, abrirPeticion = _a.abrirPeticion, cerrarPeticion = _a.cerrarPeticion;
 var Server = /** @class */ (function () {
     function Server() {
-        this.port = process.env.PORT || 3000;
+        this.port = process.env.PORT || 8888;
         this.app = express();
+        // this.hostname = '10.11.118.91';
+        this.hostname = '10.11.127.70';
+        // this.hostname = 'localhost'
         // Inicializar configuración de sockets 
         this.httpServer = new http_1.default.Server(this.app);
         this.io = socket_io_1.default(this.httpServer);
@@ -33,19 +36,32 @@ var Server = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    // Emite a quién tenga el reporte
     Server.prototype.emitirNuevaImagen = function (id_rep, data) {
         this.io.emit("nuevaImagen" + id_rep, data);
     };
+    // Emite a quién tenga el reporte
     Server.prototype.emitirNuevoAudio = function (id_rep, data) {
         this.io.emit("nuevoAudio" + id_rep, data);
     };
+    // Emite a quién tenga el reporte
+    Server.prototype.emitirNuevoVideo = function (id_rep, data) {
+        // console.log('Emitiré un nuevo video.');
+        this.io.emit("nuevoVideo" + id_rep, data);
+    };
+    // Emite a quién tenga el reporte
     Server.prototype.emitirGeolocalizacion = function (id_rep, data) {
         this.io.emit("nuevaGeolocalizacion" + id_rep, data);
     };
-    Server.prototype.emitirAlertasActualizadas = function (alertas, sala) {
-        this.io.to(sala).emit('alertasActualizadas', alertas);
-        // this.io.emit(`alertasActualizadas`, alertas)
+    // Emite a la estación correspondiente, filtrada por sala. 
+    Server.prototype.emitirAlertasActualizadas = function (estacion, alertas, sala) {
+        this.io.to(sala).emit('alertasActualizadas' + estacion, alertas);
     };
+    // Emite a quién tenga el reporte
+    Server.prototype.emitirAlertaCancelada = function (id_rep, data) {
+        this.io.emit("alertaCancelada" + id_rep, data);
+    };
+    // Emite a quién tenga el reporte
     Server.prototype.emitirListaBotonazos = function (id_rep, data) {
         this.io.emit("listaBotonazos" + id_rep, data);
     };
@@ -71,11 +87,7 @@ var Server = /** @class */ (function () {
             // Escuchar cuando un cliente se conecto
             socket.CONECTADO(cliente);
             // Escuchar si tengo una alerta abierta 
-            // ( Moverla a un archivo donde no estorbe. ) 
             cliente.on('alertaAbierta', function (data, callback) {
-                // Debe tener:
-                // id_reporte
-                // id_user_cc
                 if (!data.id_reporte || !Number.isInteger(data.id_reporte)) {
                     return callback({
                         ok: false,
@@ -88,26 +100,33 @@ var Server = /** @class */ (function () {
                         resp: 'El usuario es inválido.'
                     });
                 }
-                abrirPeticion(data, function (err, resp) {
+                // console.log('ANTES DE ABRIR PETICION');
+                // console.log(data);
+                abrirPeticion(data, function (err, dataResp) {
+                    // console.log('ABRIR PETICION - SERVER');
+                    // console.log(dataResp.respuesta[0][0]);
                     if (err) {
                         // Deberia de mostrar una pantalla de alerta de error al abrir petición 
                         return callback({
+                            CD: 1,
                             ok: false,
                             resp: err
                         });
                     }
                     else {
                         // Mandar lista actualizada a todos los usuarios 
-                        obtenerAlertasPendientes(function (err, alertas) {
+                        // primer parametro es object {estacion y sala}
+                        obtenerAlertasPendientes({ sala: dataResp.respuesta[0][0].sala, estacion: data.idEstacion }, function (err, alertas) {
                             if (err) {
                                 // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
                                 return callback({
+                                    CD: 2,
                                     ok: false,
                                     resp: err
                                 });
                             }
                             else {
-                                _this.io.emit('alertasActualizadas', alertas);
+                                _this.emitirAlertasActualizadas(data.idEstacion, alertas, dataResp.respuesta[0][0].sala);
                                 return callback(null, {
                                     ok: true,
                                     resp: 'Petición abierta con éxito.'
@@ -118,6 +137,7 @@ var Server = /** @class */ (function () {
                 });
             });
             cliente.on('alertaCerrada', function (data, callback) {
+                /* Puede cerrar alertas con estatus 0 y estatus 3 (Sin modificarlo) */
                 //   Debe tener:
                 // id_reporte
                 // estatus_actual
@@ -125,7 +145,7 @@ var Server = /** @class */ (function () {
                 // descrip_emerg
                 // cierre_conclusion
                 // num_unidad
-                // TOKEN (VALIDAR EL # DEL USUARIO)
+                // token (VALIDAR EL # DEL USUARIO)
                 if (!data.id_reporte || !Number.isInteger(data.id_reporte)) {
                     return callback({
                         ok: false,
@@ -138,7 +158,7 @@ var Server = /** @class */ (function () {
                         resp: 'El token es inválido, por favor inicie sesión.'
                     });
                 }
-                cerrarPeticion(data, function (err, resp) {
+                cerrarPeticion(data, function (err, dataResp) {
                     if (err) {
                         // Deberia de mostrar una pantalla de alerta de error al cerrar petición 
                         return callback({
@@ -147,10 +167,8 @@ var Server = /** @class */ (function () {
                         });
                     }
                     else {
-                        console.log('XD');
-                        console.log(resp);
-                        // Mandar lista actualizada a todos los usuarios 
-                        obtenerAlertasPendientes(function (err, alertas) {
+                        // primer parametro es object {estacion y sala}
+                        obtenerAlertasPendientes({ sala: dataResp.resultado[0][0].sala, estacion: dataResp.resultado[0][0].estacion }, function (err, alertas) {
                             if (err) {
                                 // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
                                 return callback({
@@ -159,7 +177,7 @@ var Server = /** @class */ (function () {
                                 });
                             }
                             else {
-                                _this.io.emit('alertasActualizadas', alertas);
+                                _this.emitirAlertasActualizadas(Number.parseInt(dataResp.resultado[0][0].estacion), alertas, dataResp.resultado[0][0].sala);
                                 return callback(null, {
                                     ok: true,
                                     resp: 'Petición cerrada con éxito.'

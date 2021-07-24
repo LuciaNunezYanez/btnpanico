@@ -4,6 +4,8 @@ const fs = require('fs');
 
 import MySQL from '../mysql/mysql';
 import Server from '../server/server';
+import { Response, Request } from 'express';
+import { json } from 'body-parser';
 
 const socketServer = Server.instance;
 const app = express();
@@ -15,18 +17,76 @@ app.use( fileUpload({ useTempFiles: true }) );
 // codificados en Base64 
 // NO recibe archivos sin codificar 
 
+app.post('/perfil', (req: any, res: Response) => {
+    const imagen: string = req.body.imagen;
+    const date = new Date();
+    let ruta;
+
+    if ( imagen === undefined || imagen.length < 10) {
+        return res.json({
+            ok: false, 
+            err: {
+                message: 'No se seleccionó ninguna fotografía de perfíl'
+            }
+        });
+    }
+    let nombreArchivo = `fotoPerfil${ date.getTime() }.jpeg`;
+
+    // Grabar archivo en la ruta del servidor 
+    try{
+        // Remplazar la cabecera de la imagenBase64
+        let buffer = Buffer.from(imagen.replace(/^data:image\/(png|gif|jpeg);base64,/,''),'base64');
+        ruta = `multimedia/imagenes/${nombreArchivo}`;
+        if(process.env.RUTAUPLOADS){
+            fs.writeFileSync(process.env.RUTAUPLOADS + '/' + ruta, buffer);
+        } else {
+            fs.writeFileSync(ruta, buffer);
+        }
+    } catch(err){
+        console.log(err);
+        return res.json({
+            ok: false, 
+            err: {
+                message: 'Ocurrió un error al grabar archivo'
+            }
+        });
+    }       
+
+
+    const QUERY = `CALL addMultimediaRtID(
+        ${MySQL.instance.cnn.escape(date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate() + ' ' + 
+            date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds())},
+        'imagen','imagenes/${nombreArchivo}', 0, 'foto perfil', @last_id)`;
+    MySQL.ejecutarQuery( QUERY, (err: any, idMultimedia: Object[][]) => {
+        if(err) {
+            return res.json({
+                ok: false, 
+                error: err,
+                class: 'uploads'
+            });
+        } else {
+            return res.json({
+                ok: true, 
+                id_multimedia: idMultimedia[0][0],
+                message: '¡Archivo subido correctamente!',
+            });
+        }
+    });
+    
+});
 
 app.post('/imagenes/:reporte', function(req: any, res: any) {
     const idReporte: number = req.params.reporte;
     const fechaHora: string = req.body.fecha;
     const imagen: string = req.body.imagen;
+    let descripcion: string = req.body.descripcion;
     const nameArchivo = generarNombreArchivo(fechaHora, idReporte);
     
     let ruta;
-    console.log("La fecha de foto: " + fechaHora);
+    // console.log("La fecha de foto: " + fechaHora);
 
     if (idReporte === 0) {
-        return res.status(400).json({
+        return res.json({
             ok: false, 
             err: {
                 message: 'Reporte invalido'
@@ -35,7 +95,7 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
     }
 
     if ( imagen === undefined) {
-        return res.status(400).json({
+        return res.json({
             ok: false, 
             err: {
                 message: 'No se seleccionó ningún archivo'
@@ -43,13 +103,23 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
         });
     }
 
+    if (descripcion === undefined)
+        descripcion = 'adjunto reporte';
+
     // Grabar archivo en la ruta del servidor 
     try{
         let buffer = Buffer.from(imagen, 'base64');
         ruta = `multimedia/imagenes/${nameArchivo}`;
-        fs.writeFileSync(ruta, buffer);
+        if(process.env.RUTAUPLOADS){
+            fs.writeFileSync(process.env.RUTAUPLOADS + '/' + ruta, buffer);
+        } else {
+            fs.writeFileSync(ruta, buffer);
+        }
     } catch(err){
-        return res.status(400).json({
+        
+        console.log('ERROR AL ESCRIBIR ARCHIVO');
+        console.log(err);
+        return res.json({
             ok: false, 
             err: {
                 message: 'Ocurrió un error al grabar archivo'
@@ -59,10 +129,10 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
 
     var id_multimedia;
     // Registra el archivo en la base de datos
-    const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'imagen','imagenes/${nameArchivo}',${idReporte},@last_id)`;
+    const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'imagen','imagenes/${nameArchivo}',${idReporte}, ${MySQL.instance.cnn.escape(descripcion)} , @last_id)`;
     MySQL.ejecutarQuery( QUERY, (err: any, idMultimedia: Object[][]) => {
       if(err) {
-          return res.status(400).json({
+          return res.json({
               ok: false, 
               error: err,
               class: 'uploads'
@@ -91,19 +161,22 @@ app.post('/imagenes/:reporte', function(req: any, res: any) {
 // POST PARA AUDIO
 app.post('/audio/:reporte', function(req: any, res: any) {
     const idReporte: number = req.params.reporte;
-    const fechaHora: string = req.body.fecha;
+    let fechaHora: string = req.body.fecha;
     const audio: string = req.body.audio;
     const parte: number = req.body.parte;
+    let descripcion: string = req.body.descripcion;
     let ruta;
 
     // console.log("Recibi la informacion de audio: " + audio);
-    console.log("La fecha de audio: " + fechaHora);
-    // console.log("Recibi la informacion de reporte: " + imagen.length);
-
+    // console.log("La fecha de audio: " + fechaHora);
+    if(fechaHora === undefined){
+        const fecha = new Date();
+        fechaHora = fecha.getFullYear() + '-' + (fecha.getMonth() + 1) + '-' + fecha.getDate() + ' ' + fecha.getHours() + ':' + fecha.getMinutes() + ':' + fecha.getSeconds();
+    }
     const nameArchivo = generarNombreAudio(fechaHora, idReporte, parte, "mp3")
 
     if (idReporte === 0) {
-        return res.status(400).json({
+        return res.json({
             ok: false, 
             err: {
                 message: 'Reporte invalido'
@@ -112,7 +185,7 @@ app.post('/audio/:reporte', function(req: any, res: any) {
     }
 
     if ( audio === undefined) {
-        return res.status(400).json({
+        return res.json({
             ok: false, 
             err: {
                 message: 'No se seleccionó ningún archivo'
@@ -120,13 +193,23 @@ app.post('/audio/:reporte', function(req: any, res: any) {
         });
     }
 
+    if (descripcion === undefined)
+        descripcion = 'adjunto reporte';
+
     // Grabar archivo en la ruta del servidor 
     try{
         ruta = `multimedia/audios/${nameArchivo}`;
         let buffer = Buffer.from(audio.replace('data:audio/ogg; codecs=opus;base64,', ''), 'base64')
-        fs.writeFileSync(ruta, buffer);
+        
+        if(process.env.RUTAUPLOADS){
+            fs.writeFileSync(process.env.RUTAUPLOADS + '/' + ruta, buffer);
+        } else {
+            fs.writeFileSync(ruta, buffer);
+        }
+        
     } catch(err){
-        return res.status(400).json({
+        console.log(err);
+        return res.json({
             ok: false, 
             err: {
                 message: 'Ocurrió un error al grabar archivo'
@@ -136,12 +219,11 @@ app.post('/audio/:reporte', function(req: any, res: any) {
     
     
     // Registra el archivo en la base de datos
-    const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'audio','audios/${nameArchivo}',${idReporte},@last_id)`;
-
+    const QUERY = `CALL addMultimediaRtID(${MySQL.instance.cnn.escape(fechaHora)},'audio','audios/${nameArchivo}',${idReporte}, ${MySQL.instance.cnn.escape(descripcion)}, @last_id)`;
     let id_multimedia;
     MySQL.ejecutarQuery( QUERY, (err: any, idMultimedia: Object[][]) => {
       if(err) {
-          return res.status(400).json({
+          return res.json({
               ok: false, 
               error: err,
               class: 'uploads'
@@ -167,6 +249,108 @@ app.post('/audio/:reporte', function(req: any, res: any) {
    socketServer.emitirNuevoAudio(idReporte, data);
 });
 
+app.post('/video/:reporte', function(req: any, res: Response) {
+
+    const id_reporte: number = req.params.reporte;
+    const fecha: string = MySQL.instance.cnn.escape(getFecha());
+    const video: any = req.files.video;
+
+    if(video === undefined){
+        return res.status(202).json({
+            ok: false, 
+            message: 'Video no recibido'
+        });
+    }
+    
+    // Grabar archivo en la ruta del servidor 
+    try{
+        // Listas de promesas para ejecutar
+        let promises: any[] = [];
+        let videos: Object[] = [];
+        let querys: any[] = [];
+
+        if(video.name){
+            let rutaVideo = `multimedia/videos/${id_reporte}-${video.name}`;
+            if(process.env.RUTAUPLOADS){
+                rutaVideo = process.env.RUTAUPLOADS + '/' + rutaVideo;
+            }
+            promises.push(video.mv(rutaVideo));
+            let query = `CALL addMultimediaRtID(${fecha}, 'video', 'videos/${id_reporte}-${video.name}', ${id_reporte}, 'adjunto reporte', @last_id);`;
+            querys.push(MySQL.ejecutarQueryPr(query));
+        } else {
+            for(let i=0; i<video.length; i++){
+                let rutaVideo = `multimedia/videos/${id_reporte}-${video[i].name}`;
+                if(process.env.RUTAUPLOADS){
+                    rutaVideo = process.env.RUTAUPLOADS + '/' + rutaVideo;
+                }
+                // Guardar ruta y crear array de promesas
+                // rutas.push();
+                promises.push(video[i].mv(rutaVideo));
+                let query = `CALL addMultimediaRtID(${fecha}, 'video', 'videos/${id_reporte}-${video[i].name}', ${id_reporte}, 'adjunto reporte', @last_id);`;
+                querys.push(MySQL.ejecutarQueryPr(query));
+            }
+        }
+
+        
+        Promise.all(promises).then( () => {
+            Promise.all(querys).then( (resultado) => {
+                // console.log('Resultado éxitoso al agregar base de datos y mover archivos');
+                res.status(200).json({ok: true});
+            }).catch( (error) => {
+                console.log('#3 Error al grabar en base de datos');
+                console.log(error);
+                return res.status(202).json({ok: false, error});
+            });
+        }).catch( (err) => {
+            console.log('#2 Algo salio mal al mover los archiovos');
+            return res.status(202).json({ok: false, err});
+        });
+
+        // Emitir a lo usuarios el/los nuevos videos
+        const QUERY = `CALL getMultimedRep(${id_reporte});`;
+        MySQL.ejecutarQuery(QUERY, (err: any, result: any[]) => {
+            if(err){
+                console.log(err);
+            } else {
+                // Aplicar filtro para solo obtener videos
+                console.log(result);
+                socketServer.emitirNuevoVideo(id_reporte, {
+                    message: 'Te traigo un video',
+                    videos: result[0]
+                });
+            }
+        });
+        
+        
+        //     id_multimedia, 
+        //     fechahora_captura: fechaHora,
+        //     tipo_archivo: 'imagen',
+        //     ruta: ruta.replace('multimedia/',''), 
+        //     id_reporte_mult: idReporte
+
+    } catch(err){
+        console.log(err);
+        return res.status(202).json({
+            ok: false, 
+            message: '#1 Ocurrió un error al grabar archivo'
+        });
+    }
+});
+
+
+function getFecha(): string{
+    const date = new Date();
+    return date.getFullYear() + '/' + 
+        (date.getMonth() + 1) + '/' + 
+        date.getDate() + ' ' +
+        
+        date.getHours() + ':' + 
+        date.getMinutes() + ':' + 
+        date.getSeconds();
+}
+
+
+
 function generarNombreArchivo(fechaHora:string, idReporte:number){
     // Obtener fecha y hora
     let date = fechaHora.split(' ');
@@ -184,7 +368,13 @@ function generarNombreArchivo(fechaHora:string, idReporte:number){
 
 function generarNombreAudio(fechaHora:string, idReporte:number, parte:number, extension:string){
     // Obtener fecha y hora
+    if(fechaHora === undefined){
+        // Recibirla: 2019-10-28 15:24:55
+        const fecha = new Date();
+        fechaHora = fecha.getFullYear() + '-' + (fecha.getMonth() + 1) + '-' + fecha.getDate() + ' ' + fecha.getHours() + ':' + fecha.getMinutes() + ':' + fecha.getSeconds();
+    } 
     let date = fechaHora.split(' ');
+    
     let fecha = date[0];
     let fechaSeparada = fecha.split('-');
     let hora = date[ date.length -1 ];

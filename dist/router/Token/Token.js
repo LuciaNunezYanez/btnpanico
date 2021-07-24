@@ -5,7 +5,8 @@
 var jwt = require('jsonwebtoken');
 function decodificarToken(Token) {
     var token = Token;
-    var SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo'; // NITDurango (Variable Heroku)
+    var SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo'; // NITDurango (Variable Heroku) // C5Dur4ng0 (Variable producción)
+    // const SEED = process.env.SEED || 'C5Dur4ng0';
     var respuesta = {};
     jwt.verify(token, SEED, function (err, decoded) {
         if (err) {

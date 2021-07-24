@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 
 function decodificarToken ( Token: any) {
     let token = Token;
-    const SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo'; // NITDurango (Variable Heroku)
+    const SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo'; // NITDurango (Variable Heroku) // C5Dur4ng0 (Variable producción)
+    // const SEED = process.env.SEED || 'C5Dur4ng0';
     let respuesta = {};
     
     jwt.verify(token, SEED, (err: any, decoded: any) => {

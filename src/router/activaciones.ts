@@ -33,9 +33,9 @@ router.get('/:id_reporte', (req: Request, res: Response) => {
 router.put('/:id_reporte', (req: Request, res: Response) => {
     const id_reporte: number = Number.parseInt(req.params.id_reporte);
     const estatus: number = Number.parseInt(req.body.estatus);
-    const QUERY = `UPDATE reporte SET estatus_actual = ${estatus} WHERE id_reporte = ${id_reporte};`
+    const QUERY = `CALL editAlertaCancelada(${estatus}, ${id_reporte}, @last_id);`
 
-    MySQL.ejecutarQuery(QUERY, (err: any, resultado: any) => {
+    MySQL.ejecutarQuery(QUERY, (err: any, resp: any[][]) => {
         if(err){
             console.log('Error al modificar el estatus del reporte');
             console.log(err);
@@ -44,16 +44,37 @@ router.put('/:id_reporte', (req: Request, res: Response) => {
                 err
             });
         } else {
-            // console.log('Todo salió bien');
-            // console.log(resultado);
-            return res.json({
-                ok: true, 
-                col_afectadas: resultado.affectedRows
-            });
+            if( resp[0][0].estatus === estatus ){ 
+                // Mandar lista actualizada a todos los usuarios 
+                // primer parametro es object {estacion y sala}
+                obtenerAlertasPendientes( { sala: resp[0][0].sala, estacion: resp[0][0].estacion }, (err: any, alertas: Object) => {
+                    if(err){
+                        console.log('Ocurrió un error al obtener las alertas pendientes');
+                        console.log(err);
+                        return res.json({
+                            ok: false,
+                            error: err
+                        });
+                    } else {
+                        // Emitir a todos los usuarios la lista actualizada de alertas
+                        socketServer.emitirAlertasActualizadas(Number.parseInt(resp[0][0].estacion), alertas, resp[0][0].sala);   
+                        // Emitir el nuevo estatus de la alerta 
+                        socketServer.emitirAlertaCancelada(id_reporte, {estatus: 3});
+                        
+                        return res.json({
+                            ok: true
+                        });                      
+                    }
+                });
+            } else {
+                return res.json({
+                    ok: false, 
+                    error: 'Reporte no cancelado'
+                });
+            }
         }
-    })
-
-})
+    });
+});
 
 
 // Registrar cada vez que se presiona el botón de pánico con un reporte existente generado
@@ -63,17 +84,18 @@ router.post('/:id_reporte', (req: Request, res: Response) => {
     const QUERY = `CALL addActivacionReporte(${id_reporte}, ${fecha_activacion});`
     
     if(id_reporte >= 1 && fecha_activacion != undefined ){
-        MySQL.ejecutarQuery(QUERY, (err: any, resp: any) => { 
+        MySQL.ejecutarQuery(QUERY, (err: any, resp: any[][]) => { 
             if(err) {
                 return res.status(500).json({
                     ok: false, 
                     error: err
                 });
             } else {
-                if(resp.affectedRows && resp.affectedRows == 1){
+                if(resp[0][0].estacion){
                     
                      // Mandar lista actualizada a todos los usuarios 
-                     obtenerAlertasPendientes( (err: any, alertas: Object) => {
+                     // primer parametro es object {estacion y sala}
+                     obtenerAlertasPendientes( {sala: resp[0][0].sala, estacion: resp[0][0].estacion}, (err: any, alertas: Object) => {
                         if(err){
                             // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
                             console.log('Ocurrió un error al agregar botonazo');
@@ -84,14 +106,14 @@ router.post('/:id_reporte', (req: Request, res: Response) => {
                             });
                         } else {
                             // Emitir a todos los usuarios la lista actualizada de alertas
-                            socketServer.emitirAlertasActualizadas(alertas, 'NIT');
+                            socketServer.emitirAlertasActualizadas(Number.parseInt(resp[0][0].estacion), alertas, resp[0][0].sala);
 
                             // Una vez agregada la alerta se actualiza la lista
                             const QUERY = `CALL getActivacionesReporte(${id_reporte});`;
                             MySQL.ejecutarQuery(QUERY, (err: any, activaciones: any[]) => {
                                 if(err) {
                                     console.log('Error al obtener activaciones por reporte');
-                                    console.log(err);
+                                    console.log(err);0
                                     return res.json({
                                         ok: false,
                                         error: err

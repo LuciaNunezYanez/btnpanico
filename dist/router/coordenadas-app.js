@@ -15,13 +15,20 @@ router.post('/:id_reporte', function (req, res) {
     var lat_coord_reporte = req.body.lat_coord_reporte;
     var lng_coord_reporte = req.body.lng_coord_reporte;
     var fecha_coord_reporte = mysql_1.default.instance.cnn.escape(req.body.fecha_coord_reporte);
+    var lugar = req.body.lugar;
+    if (lugar === undefined) {
+        lugar = mysql_1.default.instance.cnn.escape('Actual');
+    }
+    else {
+        lugar = mysql_1.default.instance.cnn.escape(lugar);
+    }
     console.log('Coordenadas: Lat ' + lat_coord_reporte + ' Lng ' + lng_coord_reporte);
     // console.log("id_reporte: " + id_coord_reporte);
     // console.log("latitud: " + lat_coord_reporte);
     // console.log("longitud: " + lng_coord_reporte);
     // console.log("fecha: " + fecha_coord_reporte);
     // return; 
-    var query = "CALL addCoordenadasRtID(\n        " + id_coord_reporte + ",\n        " + lat_coord_reporte + ",\n        " + lng_coord_reporte + ",\n        " + fecha_coord_reporte + ",\n        @last_id);";
+    var query = "CALL addCoordenadasRtID(\n        " + id_coord_reporte + ",\n        " + lat_coord_reporte + ",\n        " + lng_coord_reporte + ",\n        " + fecha_coord_reporte + ",\n        " + lugar + ",\n        @last_id);";
     // console.log(query);
     if (id_coord_reporte != undefined && lat_coord_reporte != undefined && lng_coord_reporte != undefined && fecha_coord_reporte != null) {
         mysql_1.default.ejecutarQuery(query, function (err, resp) {
@@ -67,7 +74,7 @@ router.get('/:id_reporte', function (req, res) {
         var id_reporte = Number.parseInt(req.params.id_reporte);
         var query = "CALL getCoordenadasRep(" + id_reporte + ");";
         mysql_1.default.ejecutarQuery(query, function (err, coord) {
-            var _a, _b, _c, _d, _e;
+            var _a, _b, _c, _d, _e, _f;
             try {
                 if (err) {
                     return res.status(500).json({
@@ -83,7 +90,8 @@ router.get('/:id_reporte', function (req, res) {
                         id_coord_reporte: (_b = coord[0][0]) === null || _b === void 0 ? void 0 : _b.id_coord_reporte,
                         lat_coord_reporte: (_c = coord[0][0]) === null || _c === void 0 ? void 0 : _c.lat_coord_reporte,
                         lng_coord_reporte: (_d = coord[0][0]) === null || _d === void 0 ? void 0 : _d.lng_coord_reporte,
-                        fecha_coord_reporte: (_e = coord[0][0]) === null || _e === void 0 ? void 0 : _e.fecha_coord_reporte
+                        fecha_coord_reporte: (_e = coord[0][0]) === null || _e === void 0 ? void 0 : _e.fecha_coord_reporte,
+                        tipo_ubicacion: (_f = coord[0][0]) === null || _f === void 0 ? void 0 : _f.tipo_ubicacion
                     });
                 }
             }

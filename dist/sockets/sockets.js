@@ -1,9 +1,5 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var mysql_1 = __importDefault(require("../mysql/mysql"));
 var obtenerAlertasPendientes = require('../mysql/mysql-alertas.nit').obtenerAlertasPendientes;
 var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var Usuarios = require('../server/classes/usuarios').Usuarios;
@@ -12,11 +8,12 @@ var jwt = require('jsonwebtoken');
 var usuarios = new Usuarios();
 var alertas = new Alertas();
 exports.CONECTADO = function (cliente) {
-    console.log("-> CLIENTE CONECTADO - DESCONOCIDO");
+    console.log("-> CLIENTE CONECTADO");
     // ==================================
     // USUARIOS NIT
     // ==================================
     cliente.on('loginNIT', function (usuario, callback) {
+        console.log('loginNIT');
         // Des-encriptar usuario para agregarlo a donde corresponde
         if (!usuario || usuario === undefined) {
             return callback({
@@ -56,19 +53,21 @@ exports.CONECTADO = function (cliente) {
         }
         // EL USUARIO SE UNE A UNA SALA
         cliente.join(sala);
-        console.log("(loginNIT) Usuario " + usuario_desenc.usuario + " conectado a la sala " + sala + ": ");
+        console.log('* La sala: ' + sala);
+        // console.log(`(loginNIT) Usuario ${usuario_desenc.usuario} conectado a la sala ${sala}: `);
         // AGREGA EL USUARIO A LA LISTA DE PERSONAS CONECTADAS 
         var usuariosNITConectados = usuarios.agregarUsuario(cliente.id, usuario_desenc.id_usuario, usuario_desenc.usuario, sala, usuario_desenc.nombres, usuario_desenc.apellPat, usuario_desenc.apellMat, usuario_desenc.tipo, usuario_desenc.depend, usuario_desenc.sexo, usuario_desenc.estatus);
-        // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT
+        // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT (No util)
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));
-        obtenerAlertasPendientes(function (err, alertas) {
+        // primer parametro es object {idEstacion y sala}
+        obtenerAlertasPendientes({ sala: sala, estacion: usuario.idEstacion }, function (err, alertas) {
             if (err) {
                 // Deberia de mostrar una pantalla de alerta
                 console.log(err);
             }
             else {
-                cliente.emit('alertasActualizadas', alertas);
+                cliente.emit('alertasActualizadas' + usuario.idEstacion, alertas);
             }
         });
     });
@@ -77,84 +76,9 @@ exports.CONECTADO = function (cliente) {
     // ========================================
     cliente.on('disconnect', function () {
         var usuarioEliminado = usuarios.borrarPersona(cliente.id);
-        if (usuarioEliminado === undefined) {
-            console.log('S<- CLIENTE DESCONECTADO - COMERCIO INACTIVO');
-        }
-        else {
-            if (usuarioEliminado.sala === 'NIT') {
-                console.log('<- CLIENTE DESCONECTADO - NIT');
-            }
-            else if (usuarioEliminado.sala === 'Comercios') {
-                console.log('<- CLIENTE DESCONECTADO - COMERCIO ACTIVO');
-            }
-        }
-    });
-    // ========================================
-    // ALERTAS COMERCIOS
-    // ========================================
-    /*cliente.on('botonActivado', function(comercio){
-        const { idComercio, idUsuario , sala, fecha } = comercio;
-        
-        console.log(`-> Nueva alerta de pánico del comercio: ${idComercio}`);
-
-        // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS
-        usuarios.agregarUsuario(
-            cliente.id,
-            idUsuario,
-            idComercio,
-            sala);
-
-        // UNIR EL USUARIO A LA SALA
-        cliente.join(sala);
-        agregarReporte(cliente, idComercio, idUsuario, fecha );
-    }
-    );*/
-};
-exports.MULTIMEDIA = function (cliente) {
-    console.log("-> ARCHIVO MULTIMEDIA RECIBIDO");
-    cliente.on('imagenEnviada', function (data, callback) {
-        cliente.broadcast.to('NIT').emit('imagenNueva', usuarios.usuarios.getPersonasPorSala('NIT'));
+        console.log('<- CLIENTE DESCONECTADO');
     });
 };
-function agregarReporte(cliente, idComercio, idUsuario, fecha) {
-    // Recibir datos p t reporte
-    var idUserCc = 1; // 1 = Sin atender
-    var idComercReporte = idComercio;
-    var idUserApp = idUsuario;
-    var idUnidad = 1; // 1 = Ninguna unidad
-    var fhDoc = mysql_1.default.instance.cnn.escape(obtenerFechaHoy());
-    var fhAtaque = mysql_1.default.instance.cnn.escape(fecha);
-    var tipoInc = 0; // 0 = Desconocido
-    var descripEmerg = mysql_1.default.instance.cnn.escape('');
-    var clasifEmerg = 0; // 0 = Normal
-    var estatusActual = 0; // 0 = Sin atender
-    var cierreConcl = mysql_1.default.instance.cnn.escape('');
-    var query = "CALL addReporteRtID(\n        " + idUserCc + ",\n        " + idComercReporte + ",\n        " + idUserApp + ",\n        " + idUnidad + ",\n        " + fhDoc + ",\n        " + fhAtaque + ",\n        " + tipoInc + ",\n        " + descripEmerg + ",\n        " + clasifEmerg + ",\n        " + estatusActual + ",\n        " + cierreConcl + ",\n        @last_id);";
-    mysql_1.default.ejecutarQuery(query, function (err, id) {
-        if (err) {
-            console.log('No se pudo agregar reporte: ', err);
-            // Emitir a cliente android que NO se pudo agregar el reporte 
-            cliente.emit('alertaNoRecibida', '0');
-        }
-        else {
-            // Se retornan los datos del reporte
-            var reporteAgregado = id[0][0].last_id;
-            var alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
-            obtenerAlertasPendientes(function (err, alertas) {
-                if (err) {
-                    console.log('Error al obtener alertas pendientes');
-                    console.log(err);
-                }
-                else {
-                    cliente.broadcast.to('NIT').emit('alertasActualizadas', alertas);
-                }
-            });
-            console.log("Se cre\u00F3 el reporte " + reporteAgregado + " <==============");
-            // Emitir a cliente android que la alerta se recibio con el # del reporte 
-            cliente.emit('alertaRecibida', "" + reporteAgregado);
-        }
-    });
-}
 function obtenerFechaHoy() {
     var fh = new Date();
     var dia = fh.getDate();

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Mis poligonos.kml</name>
+	<Style id="s_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Folder>
+		<name>Mis poligonos</name>
+		<open>1</open>
+		<Placemark>
+			<name>C5DURANGO</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							-104.7260976521434,24.06410045316818,0 -104.734379554637,24.03574580530299,0 -104.736347366412,24.01024354152604,0 -104.7212199786407,23.9889641916857,0 -104.6974313252613,23.96848070884509,0 -104.696451414895,23.96803302760588,0 -104.682568391085,23.9644248941692,0 -104.628391751728,23.97457427938267,0 -104.6055622754339,23.98503251961039,0 -104.5814118194581,24.01056557627415,0 -104.5631197419248,24.05219756819797,0 -104.5708372533842,24.08382186196966,0 -104.6214600836159,24.09344089814464,0 -104.6879416337712,24.10308152376933,0 -104.7049402135387,24.05700590153119,0 -104.7260976521434,24.06410045316818,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>C4ELSALTO</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							-104.6562274265015,24.19659824071569,0 -104.5890602644954,24.18862486371248,0 -104.3599050799878,24.06149480214123,0 -104.1901523241504,24.27031374323611,0 -104.3122163172283,24.42036632798136,0 -104.5442236271014,24.41213582958811,0 -104.6636086398967,24.31824000584969,0 -104.6562274265015,24.19659824071569,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+		<Placemark>
+			<name>C4SANTIAGO</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							-104.7976116974172,24.44403330200545,0 -105.2260035198441,24.40378414316601,0 -105.1686295918443,24.19162850699422,0 -104.9757973211144,23.95611174744488,0 -104.7959862547777,24.00172703766787,0 -104.7456202699014,24.251913753635,0 -104.7976116974172,24.44403330200545,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

@@ -35,8 +35,8 @@ router.get('/:id_reporte', function (req, res) {
 router.put('/:id_reporte', function (req, res) {
     var id_reporte = Number.parseInt(req.params.id_reporte);
     var estatus = Number.parseInt(req.body.estatus);
-    var QUERY = "UPDATE reporte SET estatus_actual = " + estatus + " WHERE id_reporte = " + id_reporte + ";";
-    mysql_1.default.ejecutarQuery(QUERY, function (err, resultado) {
+    var QUERY = "CALL editAlertaCancelada(" + estatus + ", " + id_reporte + ", @last_id);";
+    mysql_1.default.ejecutarQuery(QUERY, function (err, resp) {
         if (err) {
             console.log('Error al modificar el estatus del reporte');
             console.log(err);
@@ -46,12 +46,35 @@ router.put('/:id_reporte', function (req, res) {
             });
         }
         else {
-            // console.log('Todo salió bien');
-            // console.log(resultado);
-            return res.json({
-                ok: true,
-                col_afectadas: resultado.affectedRows
-            });
+            if (resp[0][0].estatus === estatus) {
+                // Mandar lista actualizada a todos los usuarios 
+                // primer parametro es object {estacion y sala}
+                obtenerAlertasPendientes({ sala: resp[0][0].sala, estacion: resp[0][0].estacion }, function (err, alertas) {
+                    if (err) {
+                        console.log('Ocurrió un error al obtener las alertas pendientes');
+                        console.log(err);
+                        return res.json({
+                            ok: false,
+                            error: err
+                        });
+                    }
+                    else {
+                        // Emitir a todos los usuarios la lista actualizada de alertas
+                        socketServer.emitirAlertasActualizadas(Number.parseInt(resp[0][0].estacion), alertas, resp[0][0].sala);
+                        // Emitir el nuevo estatus de la alerta 
+                        socketServer.emitirAlertaCancelada(id_reporte, { estatus: 3 });
+                        return res.json({
+                            ok: true
+                        });
+                    }
+                });
+            }
+            else {
+                return res.json({
+                    ok: false,
+                    error: 'Reporte no cancelado'
+                });
+            }
         }
     });
 });
@@ -69,9 +92,10 @@ router.post('/:id_reporte', function (req, res) {
                 });
             }
             else {
-                if (resp.affectedRows && resp.affectedRows == 1) {
+                if (resp[0][0].estacion) {
                     // Mandar lista actualizada a todos los usuarios 
-                    obtenerAlertasPendientes(function (err, alertas) {
+                    // primer parametro es object {estacion y sala}
+                    obtenerAlertasPendientes({ sala: resp[0][0].sala, estacion: resp[0][0].estacion }, function (err, alertas) {
                         if (err) {
                             // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
                             console.log('Ocurrió un error al agregar botonazo');
@@ -83,13 +107,14 @@ router.post('/:id_reporte', function (req, res) {
                         }
                         else {
                             // Emitir a todos los usuarios la lista actualizada de alertas
-                            socketServer.emitirAlertasActualizadas(alertas, 'NIT');
+                            socketServer.emitirAlertasActualizadas(Number.parseInt(resp[0][0].estacion), alertas, resp[0][0].sala);
                             // Una vez agregada la alerta se actualiza la lista
                             var QUERY_1 = "CALL getActivacionesReporte(" + id_reporte + ");";
                             mysql_1.default.ejecutarQuery(QUERY_1, function (err, activaciones) {
                                 if (err) {
                                     console.log('Error al obtener activaciones por reporte');
                                     console.log(err);
+                                    0;
                                     return res.json({
                                         ok: false,
                                         error: err

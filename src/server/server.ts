@@ -15,11 +15,14 @@ export default class Server{
     public port: any;
     public io: socketIO.Server;
     public httpServer: http.Server;
+    public hostname: string;
 
     private constructor(){
-        this.port = process.env.PORT || 3000;
+        this.port = process.env.PORT || 8888;
         this.app = express();
-        
+        // this.hostname = '10.11.118.91';
+        this.hostname = '10.11.127.70';
+        // this.hostname = 'localhost'
         // Inicializar configuración de sockets 
         this.httpServer = new http.Server( this.app );
         this.io = socketIO(this.httpServer);
@@ -32,23 +35,38 @@ export default class Server{
         return this._instance || (this._instance = new this());
     }
 
+    // Emite a quién tenga el reporte
     public emitirNuevaImagen(id_rep: number, data: Object){
         this.io.emit(`nuevaImagen${id_rep}`, data);
     }
     
+    // Emite a quién tenga el reporte
     public emitirNuevoAudio(id_rep: number, data: Object){
         this.io.emit(`nuevoAudio${id_rep}`, data);
     }
 
+    // Emite a quién tenga el reporte
+    public emitirNuevoVideo(id_rep: number, data: Object){
+        // console.log('Emitiré un nuevo video.');
+        this.io.emit(`nuevoVideo${id_rep}`, data);
+    }
+
+    // Emite a quién tenga el reporte
     public emitirGeolocalizacion(id_rep: number, data: Object){
         this.io.emit(`nuevaGeolocalizacion${id_rep}`, data);
     }
     
-    public emitirAlertasActualizadas(alertas: Object, sala: string){
-        this.io.to(sala).emit('alertasActualizadas', alertas);
-        // this.io.emit(`alertasActualizadas`, alertas)
+    // Emite a la estación correspondiente, filtrada por sala. 
+    public emitirAlertasActualizadas(estacion: number, alertas: Object, sala: string){
+        this.io.to(sala).emit('alertasActualizadas' + estacion, alertas);
     }
 
+    // Emite a quién tenga el reporte
+    public emitirAlertaCancelada(id_rep: number, data: Object){
+        this.io.emit(`alertaCancelada${id_rep}`, data);
+    }
+
+    // Emite a quién tenga el reporte
     public emitirListaBotonazos(id_rep: number, data: Object){
         this.io.emit(`listaBotonazos${id_rep}`, data);
     }
@@ -82,13 +100,8 @@ export default class Server{
             socket.CONECTADO(cliente);
 
             // Escuchar si tengo una alerta abierta 
-            // ( Moverla a un archivo donde no estorbe. ) 
-            cliente.on('alertaAbierta', (data: Alerta, callback: Function) => {
+            cliente.on('alertaAbierta', (data: any, callback: Function) => {
 
-                // Debe tener:
-                // id_reporte
-                // id_user_cc
-               
                 if(!data.id_reporte || !Number.isInteger(data.id_reporte)){
                     return callback({
                         ok: false, 
@@ -101,25 +114,33 @@ export default class Server{
                     });
                 }
         
-                abrirPeticion(data, ( err: any, resp: any) => {
+                // console.log('ANTES DE ABRIR PETICION');
+                // console.log(data);
+                abrirPeticion(data, ( err: any, dataResp: any) => {
+                    // console.log('ABRIR PETICION - SERVER');
+                    // console.log(dataResp.respuesta[0][0]);
+
                     if (err){
                         // Deberia de mostrar una pantalla de alerta de error al abrir petición 
                         return callback({
+                            CD: 1,
                             ok: false, 
                             resp: err
                         });
                     } else {
                         // Mandar lista actualizada a todos los usuarios 
-                        obtenerAlertasPendientes( (err: any, alertas: Object) => {
+                        // primer parametro es object {estacion y sala}
+                        obtenerAlertasPendientes( {sala: dataResp.respuesta[0][0].sala, estacion: data.idEstacion}, (err: any, alertas: Object) => {
                             if(err){
                                 // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
                                 return callback({
+                                    CD: 2, 
                                     ok: false, 
                                     resp: err
                                 });
                 
                             } else {
-                                this.io.emit('alertasActualizadas', alertas);
+                                this.emitirAlertasActualizadas( data.idEstacion, alertas, dataResp.respuesta[0][0].sala);
                                 return callback(null, {
                                     ok: true,     
                                     resp: 'Petición abierta con éxito.'
@@ -131,6 +152,7 @@ export default class Server{
             });
 
             cliente.on('alertaCerrada', (data: Alerta, callback: Function) => {
+                /* Puede cerrar alertas con estatus 0 y estatus 3 (Sin modificarlo) */
 
                 //   Debe tener:
                 // id_reporte
@@ -139,8 +161,7 @@ export default class Server{
                 // descrip_emerg
                 // cierre_conclusion
                 // num_unidad
-                // TOKEN (VALIDAR EL # DEL USUARIO)
-
+                // token (VALIDAR EL # DEL USUARIO)
 
                 if(!data.id_reporte || !Number.isInteger(data.id_reporte)){
                     return callback({
@@ -155,7 +176,7 @@ export default class Server{
                     });
                 }
         
-                cerrarPeticion(data, ( err: any, resp: any) => {
+                cerrarPeticion(data, ( err: any, dataResp: any) => {
                     if (err){
                         // Deberia de mostrar una pantalla de alerta de error al cerrar petición 
                         return callback({
@@ -163,10 +184,8 @@ export default class Server{
                             resp: err
                         });
                     } else {
-                        console.log('XD');
-                        console.log(resp);
-                        // Mandar lista actualizada a todos los usuarios 
-                        obtenerAlertasPendientes( (err: any, alertas: Object) => {
+                        // primer parametro es object {estacion y sala}
+                        obtenerAlertasPendientes( {sala: dataResp.resultado[0][0].sala, estacion: dataResp.resultado[0][0].estacion}, (err: any, alertas: Object) => {
                             if(err){
                                 // Deberia de mostrar una pantalla de alerta de error al traer la nueva lista
                                 return callback({
@@ -175,7 +194,7 @@ export default class Server{
                                 });
                 
                             } else {
-                                this.io.emit('alertasActualizadas', alertas);
+                                this.emitirAlertasActualizadas(Number.parseInt(dataResp.resultado[0][0].estacion), alertas, dataResp.resultado[0][0].sala);
                                 return callback(null, {
                                     ok: true,     
                                     resp: 'Petición cerrada con éxito.'

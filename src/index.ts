@@ -1,4 +1,6 @@
 import Server from './server/server';
+import KML from './kml/kml';
+
 import comercios from './router/comercio';
 import reporte from './router/reporte';
 import multimedia from './router/multimedia';
@@ -11,17 +13,35 @@ import uploads from './router/uploads';
 import usuarioscomercios from './router/usuarios-comercios';
 import incidentes from './router/incidentes';
 import registrocomercios from './router/registro-comercios/registro-comercios';
+import registroalertagenero from './router/registro-alertagenero/registro-alertagenero';
 import estados from './router/estados/estados';
 import municipios from './router/estados/municipios';
 import localidades from './router/estados/localidades';
 import coordenadas from './router/coordenadas-app';
 import codigoActivacion from './router/codigo-activacion/codigo';
 import activaciones from './router/activaciones';
+import direccion from './router/direccion';
+import directorio from './router/directorio';
+import recuperar from './router/recuperacion-email';
+import datosmedicos from './router/registro-alertagenero/datos-medicos';
+import contactoemerg from './router/contacto-emergencia/contacto-emergencia';
+import token from './router/codigo-activacion/tokens';
+import mensajes from './router/firebase/mensajes';
+import video from './router/multimedia/video';
+
 
 import bodyParser from 'body-parser';
+// import KML_Operations from './kml/kml';
+
+
+
 var cors = require('cors');
+// Config FB
+var admin = require('firebase-admin');
+var serviceAccount = require('../dist/firebase/fir-storage-sdk.json');
 
 const server = Server.instance;
+const kml = KML.instance;
 
 // BodyParser
 server.app.use(bodyParser.urlencoded({ extended: true, limit: '50mb'}));
@@ -31,9 +51,12 @@ server.app.use(bodyParser.json({ limit: '50mb' }));
 // server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
 server.app.use(cors(), (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
+    // res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+    // res.header('Access-Control-Allow-Origin', '10.11.127.70');
     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', '*');
+    res.header('Content-Type', 'application/x-www-form-urlencoded');
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
     // Esta de prueba
     res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=Strict");
@@ -53,17 +76,28 @@ server.app.use('/upload', uploads);
 server.app.use('/usuariocomercio', usuarioscomercios)
 server.app.use('/incidentes', incidentes);
 server.app.use('/registrocomercios', registrocomercios);
+server.app.use('/registroalertagenero', registroalertagenero);
 server.app.use('/estados', estados);
 server.app.use('/municipios', municipios);
 server.app.use('/localidades', localidades);
 server.app.use('/coordenadas', coordenadas);
 server.app.use('/codigoactivacion', codigoActivacion);
 server.app.use('/activaciones', activaciones);
-
-// MySQL get instance 
-// MySQL.instance;
+server.app.use('/direccion', direccion);
+server.app.use('/directorio', directorio);
+server.app.use('/recuperar', recuperar);
+server.app.use('/datosmedicos', datosmedicos);
+server.app.use('/contactoemerg', contactoemerg);
+server.app.use('/token', token);
+server.app.use('/mensajes', mensajes);
+server.app.use('/videos', video);
 
 server.start(() => {
-    console.log(`Servidor corriendo en el puerto ${server.port}`);
+    console.log(`Servidor corriendo en el puerto ${server.port}`);       
 });
 
+// Firebase 
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://boton-panico-aa49f.firebaseio.com"
+  });

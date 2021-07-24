@@ -28,9 +28,30 @@ router.get('/:id', [verificaToken, verificaAdmin_role], function (req, res) {
         }
     });
 });
+router.get('/usuarios/:sala/:estacion/:dpto', function (req, res) {
+    var sala = mysql_1.default.instance.cnn.escape(req.params.sala);
+    var estacion = req.params.estacion;
+    var dpto = mysql_1.default.instance.cnn.escape(req.params.dpto);
+    var query = "CALL getUsuariosCC(" + sala + "," + estacion + "," + dpto + ")";
+    mysql_1.default.ejecutarQuery(query, function (err, usuarios) {
+        if (err) {
+            return res.json({
+                ok: false,
+                resp: err
+            });
+        }
+        else {
+            return res.json({
+                ok: true,
+                usuarios: usuarios[0]
+            });
+        }
+    });
+});
 // Agregar usuarios NIT
 // [verificaToken, verificaAdmin_role], 
 router.post('/', function (req, res) {
+    console.log(req.body);
     // Encriptar contraseña FORMA 1 
     var contrasena = (req.body.contrasena);
     // Quizá quitando el escape

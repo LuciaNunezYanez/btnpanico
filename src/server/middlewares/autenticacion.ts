@@ -24,7 +24,33 @@ const verificaToken = (req: any, res: Response, next: any) => {
 };
 
 
+const verificaTokenComercio = (req: any, res: Response, next: any) => {
+    
+    let token = req.params.token;
+    
+    const SEED = process.env.SEED || 'este-es-el-seed-de-desarrollo';
+    if(token === undefined){
+        return res.status(401).json({
+            ok: false, 
+            err: 'Token inválido'
+        });
+    }
 
+    jwt.verify(token, SEED, (err: any, decoded: any)=> {
+        if(err){
+            return res.status(401).json({
+                ok: false, 
+                err
+            });
+        } 
+        // console.log('Información decodificada del comercio:');
+        // console.log(decoded);
+        next();
+        // INFORMACIÓN DECODIFICADA DEL USUARIO
+        // req.usuario = decoded.usuario;
+        // next();
+    });
+};
 
 // ========================
 // VERIFICAR TOKEN IMAGEN
@@ -84,7 +110,7 @@ function decodificarToken(token: string) {
             }
         }
     });
-    console.log(usuario);
+    // console.log(usuario);
     return usuario;
 }
 
@@ -110,6 +136,7 @@ const verificaAdmin_role = (req: any, res: Response, next: any) => {
 
 module.exports = {
     verificaToken, 
+    verificaTokenComercio,
     verificaAdmin_role,
     verificaTokenPertenece, 
     decodificarToken

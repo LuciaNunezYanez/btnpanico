@@ -29,6 +29,69 @@ router.get('/:id', function (req, res) {
         }
     });
 });
+// Trae el reporte completo (excepto activaciones, coordenadas y multimedia)
+router.get('/full/:id', function (req, res) {
+    var query = "CALL getReporteFull(" + mysql_1.default.instance.cnn.escape(req.params.id) + ")";
+    console.log(query);
+    mysql_1.default.ejecutarQuery(query, function (err, reporte) {
+        if (err) {
+            return res.json({
+                ok: false,
+                error: err
+            });
+        }
+        else {
+            return res.json({
+                ok: true,
+                reporteFull: reporte[0][0]
+            });
+        }
+    });
+});
+// Filtto/buscador de reportes
+router.post('/filtro/', function (req, res) {
+    var folio_rep = mysql_1.default.instance.cnn.escape(req.body.folio || '');
+    var folio_CAD = mysql_1.default.instance.cnn.escape(req.body.folioCAD || '');
+    var fecha_inicio_rep = mysql_1.default.instance.cnn.escape(req.body.fecha_inicio || '');
+    var fecha_fin_rep = mysql_1.default.instance.cnn.escape(req.body.fecha_fin || '');
+    var tel_us = mysql_1.default.instance.cnn.escape(req.body.telefono || '');
+    var calle_us = mysql_1.default.instance.cnn.escape(req.body.calle || '');
+    var numero_us = mysql_1.default.instance.cnn.escape(req.body.numero || '');
+    var colonia_us = mysql_1.default.instance.cnn.escape(req.body.colonia || '');
+    var cp_us = mysql_1.default.instance.cnn.escape(req.body.cp || '');
+    var municipio_us = mysql_1.default.instance.cnn.escape(req.body.municipio || '');
+    var localidad_us = mysql_1.default.instance.cnn.escape(req.body.localidad || '');
+    var id_operador_cc = mysql_1.default.instance.cnn.escape(req.body.id_operador || '');
+    var sala_cc = mysql_1.default.instance.cnn.escape(req.body.sala || '');
+    var estacion_cc = req.body.estacion || 0;
+    // console.log(req.body);
+    // console.log(sala_cc, sala_cc.length);
+    // console.log(estacion_cc, estacion_cc.length);
+    // console.log(fecha_fin_rep, fecha_fin_rep.length);
+    // console.log(fecha_inicio_rep, fecha_inicio_rep.length);
+    // No avanzar sin sala, estacion y fechas
+    if (sala_cc.length <= 2 || estacion_cc == 0 || fecha_fin_rep.length <= 2 || fecha_inicio_rep.length <= 2) {
+        return res.json({
+            ok: false,
+            mensaje: 'La sala, estación, fecha de inicio y fecha de fin son campos obligatorios.'
+        });
+    }
+    var query = "CALL busquedaReportes(" + folio_rep + "," + folio_CAD + "," + fecha_inicio_rep + "," + fecha_fin_rep + ",\n        " + tel_us + "," + calle_us + "," + numero_us + "," + colonia_us + "," + cp_us + "," + municipio_us + "," + localidad_us + ",\n        " + id_operador_cc + "," + sala_cc + "," + estacion_cc + ");";
+    mysql_1.default.ejecutarQuery(query, function (err, results) {
+        if (err) {
+            return res.json({
+                ok: false,
+                error: err
+            });
+        }
+        else {
+            return res.json({
+                ok: true,
+                results: results[0]
+            });
+        }
+    });
+});
 // No se utiliza por la aplicación móvil 
 router.post('/', verificaToken, function (req, res) {
     // Recibir datos p t reporte
@@ -38,7 +101,7 @@ router.post('/', verificaToken, function (req, res) {
     var idUnidad = req.body.id_unidad || 1; // 1 = Ninguna unidad
     var fhDoc = mysql_1.default.instance.cnn.escape(req.body.fh_doc || '');
     var fhAtaque = mysql_1.default.instance.cnn.escape(req.body.fh_ataque || '');
-    var tipoInc = req.body.tipo_incid || 0; // 0 = Desconocido
+    var tipoInc = req.body.tipo_incid || 1; // 1 = Desconocido
     var descripEmerg = mysql_1.default.instance.cnn.escape(req.body.descrip_emerg || '');
     var clasifEmerg = req.body.clasif_emerg || 0; // 0 = Normal
     var estatusActual = req.body.estatus || 0; // 0 = Sin atender

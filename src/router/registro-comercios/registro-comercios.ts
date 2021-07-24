@@ -8,6 +8,7 @@ router.post('/', (req: Request, res: Response) => {
 
     var body: any = req.body;
 
+    // console.log('REGISTRAR COMERCIO COMPLETO <------------');
     // console.log(body);
     // return;
 
@@ -33,12 +34,13 @@ router.post('/', (req: Request, res: Response) => {
     const telefono_fijo: string = MySQL.instance.cnn.escape(body.telefono_fijo || '');
     const folio_comercio: number = body.folio_comercio;
     const razon_social: string = MySQL.instance.cnn.escape(body.razon_social);
+    const id_grupo: number = body.id_grupo || 1;
 
     // USUARIO APP 
     const nombres_usuarios_app: string = MySQL.instance.cnn.escape(body.nombres_usuarios_app); 
 	const apell_pat: string = MySQL.instance.cnn.escape(body.apell_pat); 
     const apell_mat: string = MySQL.instance.cnn.escape(body.apell_mat); 
-    const fecha_nacimiento_sucia = body.fecha_nacimiento;
+    const fecha_nacimiento =  MySQL.instance.cnn.escape(body.fecha_nacimiento);
 	const sexo_app: string = MySQL.instance.cnn.escape(body.sexo_app); // 
 	const padecimientos: string = MySQL.instance.cnn.escape(body.padecimientos || ''); 
 	const tel_movil: string = MySQL.instance.cnn.escape(body.tel_movil); 
@@ -58,9 +60,9 @@ router.post('/', (req: Request, res: Response) => {
     fecha_creacion_lista = MySQL.instance.cnn.escape(fecha_creacion_lista);
 
     // SEPARAR LA FECHA DE NACIMIENTO DEL USUARIO (0000/00/00)
-    const fecha_separada = fecha_nacimiento_sucia.split('/');
-    var fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
-    fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_lista);
+    // const fecha_separada = fecha_nacimiento_sucia.split('/');
+    // var fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
+    // fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_lista);
 
     const QUERY = `CALL addComercioCompleto(
         ${calle},
@@ -80,11 +82,12 @@ router.post('/', (req: Request, res: Response) => {
         ${telefono_fijo},
         ${folio_comercio},
         ${razon_social},
+        ${id_grupo},
 
         ${nombres_usuarios_app},
         ${apell_pat},
         ${apell_mat},
-        ${fecha_nacimiento_lista},
+        ${fecha_nacimiento},
         ${sexo_app},
         ${padecimientos},
         ${tel_movil},
@@ -101,13 +104,10 @@ router.post('/', (req: Request, res: Response) => {
         @id_comercio,
         @id_usuarios_app,
         @id_cod_activ);`;
-
-        // console.log(QUERY);
-        // return;
         
     MySQL.ejecutarQuery( QUERY, (err: any, result: any[]) => {
         if(err) {
-            return res.status(400).json({
+            return res.json({
                 ok: false, 
                 error: err
             });

@@ -12,12 +12,13 @@ const usuarios = new Usuarios();
 const alertas = new Alertas();
 
 export const CONECTADO = (cliente: Socket) => {
-    console.log("-> CLIENTE CONECTADO - DESCONOCIDO");
+    console.log("-> CLIENTE CONECTADO");
 
     // ==================================
     // USUARIOS NIT
     // ==================================
     cliente.on('loginNIT', (usuario, callback) => {
+        console.log('loginNIT');
         // Des-encriptar usuario para agregarlo a donde corresponde
         
      
@@ -64,7 +65,8 @@ export const CONECTADO = (cliente: Socket) => {
         
         // EL USUARIO SE UNE A UNA SALA
         cliente.join(sala);
-        console.log(`(loginNIT) Usuario ${usuario_desenc.usuario} conectado a la sala ${sala}: `);
+        console.log('* La sala: ' + sala );
+        // console.log(`(loginNIT) Usuario ${usuario_desenc.usuario} conectado a la sala ${sala}: `);
         
         // AGREGA EL USUARIO A LA LISTA DE PERSONAS CONECTADAS 
         let usuariosNITConectados = usuarios.agregarUsuario(
@@ -80,16 +82,17 @@ export const CONECTADO = (cliente: Socket) => {
                         usuario_desenc.sexo,
                         usuario_desenc.estatus);
 
-        // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT
+        // SE NOTIFICA NUEVO CLIENTE EN LA SALA NIT (No util)
         cliente.broadcast.to(usuario.sala).emit('listaUsuariosNIT', usuarios.getPersonasPorSala(usuario.sala));
         callback(usuarios.getPersonasPorSala(usuario.sala));
 
-        obtenerAlertasPendientes( (err: any, alertas: Object) => {
+        // primer parametro es object {idEstacion y sala}
+        obtenerAlertasPendientes( {sala, estacion: usuario.idEstacion}, (err: any, alertas: Object) => {
             if(err){
                 // Deberia de mostrar una pantalla de alerta
                 console.log(err);
             } else {
-                cliente.emit('alertasActualizadas', alertas);
+                cliente.emit('alertasActualizadas' + usuario.idEstacion, alertas);
             }
         });
     });
@@ -100,106 +103,9 @@ export const CONECTADO = (cliente: Socket) => {
     // ========================================
     cliente.on('disconnect', function (){
         let usuarioEliminado = usuarios.borrarPersona( cliente.id );
-        if (usuarioEliminado === undefined){ 
-            console.log('S<- CLIENTE DESCONECTADO - COMERCIO INACTIVO');
-        } else { 
-            if(usuarioEliminado.sala === 'NIT'){
-                console.log('<- CLIENTE DESCONECTADO - NIT');
-            } else if(usuarioEliminado.sala === 'Comercios'){
-                console.log('<- CLIENTE DESCONECTADO - COMERCIO ACTIVO');
-            }
-        }
-    });
-    
-
-    // ========================================
-    // ALERTAS COMERCIOS
-    // ========================================
-    /*cliente.on('botonActivado', function(comercio){ 
-        const { idComercio, idUsuario , sala, fecha } = comercio;
-        
-        console.log(`-> Nueva alerta de pánico del comercio: ${idComercio}`);               
-
-        // AGREGAR USUARIO COMERCIO A LA SALA COMERCIOS 
-        usuarios.agregarUsuario(
-            cliente.id, 
-            idUsuario, 
-            idComercio, 
-            sala);
-
-        // UNIR EL USUARIO A LA SALA 
-        cliente.join(sala);
-        agregarReporte(cliente, idComercio, idUsuario, fecha );
-    }
-    );*/
-}
-
-export const MULTIMEDIA = (cliente: Socket) => {
-    console.log("-> ARCHIVO MULTIMEDIA RECIBIDO");
-    
-    cliente.on('imagenEnviada', (data, callback) => {
-        cliente.broadcast.to('NIT').emit('imagenNueva', usuarios.usuarios.getPersonasPorSala('NIT'));
+        console.log('<- CLIENTE DESCONECTADO');
     });
 }
-
-
-function agregarReporte(cliente: Socket, idComercio: number, idUsuario: number, fecha: string){
-
-    // Recibir datos p t reporte
-    const idUserCc: number = 1; // 1 = Sin atender
-    const idComercReporte: number = idComercio;
-    const idUserApp: number = idUsuario;
-    const idUnidad: number = 1; // 1 = Ninguna unidad
-    const fhDoc: string = MySQL.instance.cnn.escape(obtenerFechaHoy());
-    const fhAtaque: string = MySQL.instance.cnn.escape(fecha);
-    const tipoInc: number = 0 ; // 0 = Desconocido
-    const descripEmerg: string = MySQL.instance.cnn.escape('');
-    const clasifEmerg: number = 0; // 0 = Normal
-    const estatusActual: number = 0; // 0 = Sin atender
-    const cierreConcl: string = MySQL.instance.cnn.escape('');
-
-    const query = `CALL addReporteRtID(
-        ${idUserCc},
-        ${idComercReporte},
-        ${idUserApp},
-        ${idUnidad},
-        ${fhDoc},
-        ${fhAtaque},
-        ${tipoInc},
-        ${descripEmerg},
-        ${clasifEmerg},
-        ${estatusActual},
-        ${cierreConcl},
-        @last_id);`;
-
-    
-    MySQL.ejecutarQuery( query, (err: any, id:any[][]) => {
-        if(err) {
-            console.log('No se pudo agregar reporte: ', err);
-             // Emitir a cliente android que NO se pudo agregar el reporte 
-             cliente.emit('alertaNoRecibida', '0');
-
-        } else {
-            // Se retornan los datos del reporte
-            const reporteAgregado = id[0][0].last_id;
-
-            let alertaAgregada = alertas.agregarAlerta(reporteAgregado, idComercio, idUsuario, 1, 0);
-            obtenerAlertasPendientes( (err: any, alertas: Object) => {
-                if(err){
-                    console.log('Error al obtener alertas pendientes');
-                    console.log(err);
-    
-                } else {
-                    cliente.broadcast.to('NIT').emit('alertasActualizadas', alertas);
-                }
-            });
-            console.log(`Se creó el reporte ${reporteAgregado} <==============`);
-            // Emitir a cliente android que la alerta se recibio con el # del reporte 
-            cliente.emit('alertaRecibida', `${reporteAgregado}`);
-        }
-    });
-}
-
 
 function obtenerFechaHoy(){
     const fh = new Date();
@@ -225,4 +131,5 @@ export interface Alerta {
     apellMat?: string,
     token?: string,  
     estatus?: number
+    idEstacion?: number
   }

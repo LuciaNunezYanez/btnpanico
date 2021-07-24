@@ -13,6 +13,14 @@ router.post('/:id_reporte', (req: Request, res: Response) => {
     const lat_coord_reporte = req.body.lat_coord_reporte;
     const lng_coord_reporte = req.body.lng_coord_reporte;
     const fecha_coord_reporte: string = MySQL.instance.cnn.escape(req.body.fecha_coord_reporte);
+    let lugar: string = req.body.lugar;
+    
+    
+    if(lugar === undefined){
+        lugar = MySQL.instance.cnn.escape('Actual');
+    } else {
+        lugar = MySQL.instance.cnn.escape(lugar);
+    }
     
     console.log('Coordenadas: Lat ' + lat_coord_reporte + ' Lng '+ lng_coord_reporte);
     // console.log("id_reporte: " + id_coord_reporte);
@@ -25,6 +33,7 @@ router.post('/:id_reporte', (req: Request, res: Response) => {
         ${lat_coord_reporte},
         ${lng_coord_reporte},
         ${fecha_coord_reporte},
+        ${lugar},
         @last_id);`;
 
     // console.log(query);
@@ -88,7 +97,8 @@ router.get('/:id_reporte', (req: Request, res: Response) => {
                         id_coord_reporte: coord[0][0]?.id_coord_reporte,
                         lat_coord_reporte: coord[0][0]?.lat_coord_reporte,
                         lng_coord_reporte: coord[0][0]?.lng_coord_reporte,
-                        fecha_coord_reporte: coord[0][0]?.fecha_coord_reporte
+                        fecha_coord_reporte: coord[0][0]?.fecha_coord_reporte,
+                        tipo_ubicacion: coord[0][0]?.tipo_ubicacion
                     });
                 }
             } catch (e){

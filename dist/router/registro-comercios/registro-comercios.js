@@ -9,6 +9,7 @@ var verificaToken = require('../../server/middlewares/autenticacion').verificaTo
 var router = express_1.Router();
 router.post('/', function (req, res) {
     var body = req.body;
+    // console.log('REGISTRAR COMERCIO COMPLETO <------------');
     // console.log(body);
     // return;
     // DIRECCION 
@@ -30,11 +31,12 @@ router.post('/', function (req, res) {
     var telefono_fijo = mysql_1.default.instance.cnn.escape(body.telefono_fijo || '');
     var folio_comercio = body.folio_comercio;
     var razon_social = mysql_1.default.instance.cnn.escape(body.razon_social);
+    var id_grupo = body.id_grupo || 1;
     // USUARIO APP 
     var nombres_usuarios_app = mysql_1.default.instance.cnn.escape(body.nombres_usuarios_app);
     var apell_pat = mysql_1.default.instance.cnn.escape(body.apell_pat);
     var apell_mat = mysql_1.default.instance.cnn.escape(body.apell_mat);
-    var fecha_nacimiento_sucia = body.fecha_nacimiento;
+    var fecha_nacimiento = mysql_1.default.instance.cnn.escape(body.fecha_nacimiento);
     var sexo_app = mysql_1.default.instance.cnn.escape(body.sexo_app); // 
     var padecimientos = mysql_1.default.instance.cnn.escape(body.padecimientos || '');
     var tel_movil = mysql_1.default.instance.cnn.escape(body.tel_movil);
@@ -49,15 +51,13 @@ router.post('/', function (req, res) {
     var fecha_creacion_lista = fecha_creacion_separada[2] + '/' + fecha_creacion_separada[1] + '/' + fecha_creacion_separada[0];
     fecha_creacion_lista = mysql_1.default.instance.cnn.escape(fecha_creacion_lista);
     // SEPARAR LA FECHA DE NACIMIENTO DEL USUARIO (0000/00/00)
-    var fecha_separada = fecha_nacimiento_sucia.split('/');
-    var fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
-    fecha_nacimiento_lista = mysql_1.default.instance.cnn.escape(fecha_nacimiento_lista);
-    var QUERY = "CALL addComercioCompleto(\n        " + calle + ",\n        " + numero + ",\n        " + colonia + ",\n        " + cp + ",\n        " + entre_calle_1 + ",\n        " + entre_calle_2 + ",\n        " + fachada + ",\n        " + id_localidad + ",\n        " + lat_dir + ",\n        " + lgn_dir + ",\n        \n        " + num_empleados + ",\n        " + nombre_comercio + ",\n        " + giro + ",\n        " + telefono_fijo + ",\n        " + folio_comercio + ",\n        " + razon_social + ",\n\n        " + nombres_usuarios_app + ",\n        " + apell_pat + ",\n        " + apell_mat + ",\n        " + fecha_nacimiento_lista + ",\n        " + sexo_app + ",\n        " + padecimientos + ",\n        " + tel_movil + ",\n        " + alergias + ",\n        " + tipo_sangre + ",\n        " + estatus_usuario + ",\n\n        " + folio_comercio + ", \n        " + fecha_creacion_lista + ",    \n        0, \n        " + id_usuario_nit + ",\n\n        @id_direccion,\n        @id_comercio,\n        @id_usuarios_app,\n        @id_cod_activ);";
-    // console.log(QUERY);
-    // return;
+    // const fecha_separada = fecha_nacimiento_sucia.split('/');
+    // var fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
+    // fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_lista);
+    var QUERY = "CALL addComercioCompleto(\n        " + calle + ",\n        " + numero + ",\n        " + colonia + ",\n        " + cp + ",\n        " + entre_calle_1 + ",\n        " + entre_calle_2 + ",\n        " + fachada + ",\n        " + id_localidad + ",\n        " + lat_dir + ",\n        " + lgn_dir + ",\n        \n        " + num_empleados + ",\n        " + nombre_comercio + ",\n        " + giro + ",\n        " + telefono_fijo + ",\n        " + folio_comercio + ",\n        " + razon_social + ",\n        " + id_grupo + ",\n\n        " + nombres_usuarios_app + ",\n        " + apell_pat + ",\n        " + apell_mat + ",\n        " + fecha_nacimiento + ",\n        " + sexo_app + ",\n        " + padecimientos + ",\n        " + tel_movil + ",\n        " + alergias + ",\n        " + tipo_sangre + ",\n        " + estatus_usuario + ",\n\n        " + folio_comercio + ", \n        " + fecha_creacion_lista + ",    \n        0, \n        " + id_usuario_nit + ",\n\n        @id_direccion,\n        @id_comercio,\n        @id_usuarios_app,\n        @id_cod_activ);";
     mysql_1.default.ejecutarQuery(QUERY, function (err, result) {
         if (err) {
-            return res.status(400).json({
+            return res.json({
                 ok: false,
                 error: err
             });

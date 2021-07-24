@@ -28,10 +28,34 @@ router.get('/:id', [verificaToken, verificaAdmin_role], ( req: Request, res: Res
 
 });
 
+router.get('/usuarios/:sala/:estacion/:dpto', ( req: Request, res: Response ) =>{
+    const sala = MySQL.instance.cnn.escape(req.params.sala);
+    const estacion = req.params.estacion;
+    const dpto = MySQL.instance.cnn.escape(req.params.dpto);
+    const query = `CALL getUsuariosCC(${sala},${estacion},${dpto})`;
+
+    MySQL.ejecutarQuery(query, (err: any, usuarios: any[]) => {
+        if( err ){
+            return res.json({
+                ok: false, 
+                resp: err 
+            })
+        } else {
+            return res.json({
+                ok: true, 
+                usuarios: usuarios[0]
+            })
+
+        }
+    });
+
+});
+
 // Agregar usuarios NIT
 // [verificaToken, verificaAdmin_role], 
 router.post('/',(req: Request, res: Response) => {
      
+    console.log(req.body);
     // Encriptar contraseña FORMA 1 
     let contrasena: string = ( req.body.contrasena);
     // Quizá quitando el escape
