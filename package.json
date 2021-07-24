@@ -22,7 +22,7 @@
         "copyfiles": "^2.1.1",
         "cors": "^2.8.5",
         "express": "^4.17.1",
-        "express-fileupload": "^1.1.6-alpha.6",
+        "express-fileupload": "^1.1.10",
         "firebase-admin": "^9.2.0",
         "hbs": "^4.0.5",
         "jsonwebtoken": "^8.5.1",
