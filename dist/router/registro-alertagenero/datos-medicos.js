@@ -46,7 +46,8 @@ router.post('/', function (req, res) {
     var peso = mysql_1.default.instance.cnn.escape(req.body.peso || '');
     var estatura = mysql_1.default.instance.cnn.escape(req.body.estatura || '');
     var senas_particulares = mysql_1.default.instance.cnn.escape(req.body.senas_particulares || '');
-    var QUERY = "CALL addDatosMedicos(" + habla + ", " + escucha + ", " + lee + ", " + escribe + ", " + habla_LSM + ", " + toma_medicamentos + ", " + peso + ", " + estatura + ", " + senas_particulares + ");";
+    var padecimientos_psic = mysql_1.default.instance.cnn.escape(req.body.padecimientosPsic || '');
+    var QUERY = "CALL addDatosMedicos(" + habla + ", " + escucha + ", " + lee + ", " + escribe + ", " + habla_LSM + ", " + toma_medicamentos + ", " + peso + ", " + estatura + ", " + senas_particulares + ", " + padecimientos_psic + ");";
     mysql_1.default.ejecutarQuery(QUERY, function (err, resp) {
         if (err) {
             return res.json({

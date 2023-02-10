@@ -62,4 +62,72 @@ router.put('/:id_usuario' , (req: Request, res: Response) =>{
     });
 });
 
+// Es igual al de arriba, pero para unificar las rutas
+router.put('/app/:id_usuario' , (req: Request, res: Response) =>{
+    const id_usuario: number = Number.parseInt(req.params.id_usuario);
+    const token: string = MySQL.instance.cnn.escape(req.body.token);
+
+    const queryEditar = `CALL updateTokenApp(${id_usuario}, ${token});`;
+    // console.log(queryEditar);
+    MySQL.ejecutarQuery( queryEditar, (err: any, resultado: any) => {
+        if(err) {
+            return res.json({
+                ok: false, 
+                error: err
+            });
+        } else {
+            if(resultado?.affectedRows === 1){
+                return res.json({
+                    ok: true,  
+                    res: {
+                        message: 'Éxito al modificar token'
+                    }
+                });
+            } else {
+                return res.json({
+                    ok: false,  
+                    res: {
+                        message: 'No se modificó ningún token'
+                    }
+                });
+            }
+            
+        }
+    });
+});
+
+// updateTokenCC
+router.put('/cc/:id_usuario' , (req: Request, res: Response) =>{
+    const id_usuario: number = Number.parseInt(req.params.id_usuario);
+    const token: string = MySQL.instance.cnn.escape(req.body.token);
+
+    const queryEditar = `CALL updateTokenCC(${id_usuario}, ${token});`;
+    // console.log(queryEditar);
+    MySQL.ejecutarQuery( queryEditar, (err: any, resultado: any) => {
+        if(err) {
+            return res.json({
+                ok: false, 
+                error: err
+            });
+        } else {
+            if(resultado.affectedRows){
+                return res.json({
+                    ok: true,  
+                    res: {
+                        message: 'Éxito al modificar token'
+                    }
+                });
+            } else {
+                return res.json({
+                    ok: false,  
+                    res: {
+                        message: 'No se modificó ningún token'
+                    }
+                });
+            }
+            
+        }
+    });
+});
+
 export default router;

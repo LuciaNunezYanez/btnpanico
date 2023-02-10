@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var obtenerAlertasPendientes = require('../mysql/mysql-alertas.nit').obtenerAlertasPendientes;
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var Usuarios = require('../server/classes/usuarios').Usuarios;
 var Alertas = require('../server/classes/alertas').Alertas;
 var jwt = require('jsonwebtoken');

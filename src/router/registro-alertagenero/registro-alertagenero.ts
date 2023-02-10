@@ -1,6 +1,5 @@
 import { Router, Request, Response, request } from 'express';
 import MySQL from '../../mysql/mysql';
-const { verificaToken } = require('../../server/middlewares/autenticacion');
 const router = Router();
 
 
@@ -45,13 +44,13 @@ router.post('/', (req: Request, res: Response) => {
     //console.log('Body id grupo: ', body.id_grupo + ' Y ' + id_grupo);
 
     // SEPARAR LA FECHA DE NACIMIENTO DEL USUARIO (YYYY/mm/dd)
-    var fecha_nacimiento_lista = '0000/00/00';
+    var fecha_nacimiento_lista = '1900/01/01';
     if(fecha_nacimiento_sucia && ((fecha_nacimiento_sucia.substring(2, 3) === '-') || (fecha_nacimiento_sucia.substring(2, 3) === '/'))){
         var fecha_separada = fecha_nacimiento_sucia.split('/');
         fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
         fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_lista);
     } else {
-        fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_sucia);
+        fecha_nacimiento_lista = MySQL.instance.cnn.escape(fecha_nacimiento_lista);
     }
 
     const QUERY = `CALL addUsuarioAppIndependiente(

@@ -2,24 +2,51 @@
 
 var admin = require("firebase-admin");
 
-function enviarMsgUsuarioEspecifico(){
-    var registrationToken = 'YOUR_REGISTRATION_TOKEN';
+export default class FB {
 
-    var message = {
-      data: {
-        score: '850',
-        time: '2:45'
-      },
-      token: registrationToken
-    };
+  static enviarNotifEspecificaFB(titulo: string, descripcion: string, token: string, data: Object): Promise<Object>{
+      return new Promise((resolve, reject)=> {
+        try {
+          var payload = {
+            notification: {
+                title: titulo,
+                body: descripcion,
+                // image: 'https://www.puntoporpunto.com/web/wp-content/uploads/2021/02/LSM.jpg'
+            }, 
+            data: data
+          }
+        
+          var options = {
+              priority: 'high',
+              timeToLive: 60 * 60 * 24,
+          };
 
+          admin.messaging().sendToDevice(token, payload, options)
+          .then( (resp: any) => {
+            resolve({
+              ok: true, 
+              mensaje: 'Notificación enviada con éxito.', 
+              resp, 
+              data
+            });        
+          })
+          .catch((err: any) => {
+            reject({
+              ok: false, 
+              mensaje: 'Ocurrió un error al enviar la notificación.', 
+              err, 
+              data
+            });
     
-    /*admin.messaging().send(message)
-      .then((response) => {
-        // Response is a message ID string.
-        console.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        console.log('Error sending message:', error);
-      });*/
+          });
+      } catch(error){
+        reject({
+          ok: false, 
+          mensaje: 'Ocurrió un error al enviar la notificación..', 
+          err: error,
+          data
+        });
+      }
+      });
+  }
 }

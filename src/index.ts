@@ -26,19 +26,21 @@ import recuperar from './router/recuperacion-email';
 import datosmedicos from './router/registro-alertagenero/datos-medicos';
 import contactoemerg from './router/contacto-emergencia/contacto-emergencia';
 import token from './router/codigo-activacion/tokens';
+import tokenapp from './router/codigo-activacion/tokens_app';
 import mensajes from './router/firebase/mensajes';
 import video from './router/multimedia/video';
+import corporaciones from './router/corporacion/corporaciones';
+import unidades from './router/unidades/unidades';
+import chat from './router/chat/chat';
 
 
 import bodyParser from 'body-parser';
-// import KML_Operations from './kml/kml';
-
-
 
 var cors = require('cors');
 // Config FB
 var admin = require('firebase-admin');
-var serviceAccount = require('../dist/firebase/fir-storage-sdk.json');
+// /dist/firebase/fir-storage-sdk.json
+var serviceAccount = require('./firebase/fir-storage-sdk.json');
 
 const server = Server.instance;
 const kml = KML.instance;
@@ -51,15 +53,13 @@ server.app.use(bodyParser.json({ limit: '50mb' }));
 // server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
 server.app.use(cors(), (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    // res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-    // res.header('Access-Control-Allow-Origin', '10.11.127.70');
     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Content-Type', 'application/x-www-form-urlencoded');
+    // res.header('Access-Control-Allow-Headers', '*');
+    // Método que hace que descargue los archivos, el que sea
+    // res.header('Content-Type', 'application/x-www-form-urlencoded');
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-    // Esta de prueba
-    res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=Strict");
+    // res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=Strict");
     next();
 });
 
@@ -89,8 +89,12 @@ server.app.use('/recuperar', recuperar);
 server.app.use('/datosmedicos', datosmedicos);
 server.app.use('/contactoemerg', contactoemerg);
 server.app.use('/token', token);
+server.app.use('/tokenapp', tokenapp);
 server.app.use('/mensajes', mensajes);
 server.app.use('/videos', video);
+server.app.use('/corporaciones', corporaciones);
+server.app.use('/unidades', unidades);
+server.app.use('/chat', chat);
 
 server.start(() => {
     console.log(`Servidor corriendo en el puerto ${server.port}`);       

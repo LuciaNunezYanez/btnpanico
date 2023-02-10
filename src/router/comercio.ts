@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
-const { verificaToken } = require('../server/middlewares/autenticacion');
+const { verificaToken } = require('../server/middlewares/authenticacion');
 const router = Router();
 
 // Obtener todos los comercios

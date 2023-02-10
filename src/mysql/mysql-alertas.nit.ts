@@ -1,6 +1,6 @@
 import MySQL from './mysql';
 import { Alerta } from '../sockets/sockets';
-const { decodificarToken } = require('../server/middlewares/autenticacion');
+const { decodificarToken } = require('../server/middlewares/authenticacion');
 
 function obtenerAlertasPendientes( data: any, callback: Function){
     // data es object {estacion y sala}
@@ -29,10 +29,11 @@ function obtenerAlertasPendientes( data: any, callback: Function){
 function abrirPeticion( alerta: any, callback: Function){
     // console.log('ABRIR PETICION MYSQL ALERTAS');
     // console.log(alerta);
+    const estatus_chat = 1;
     const { id_reporte, estatus_actual, id_user_cc, nuevo_estatus} = alerta;
 
     if(estatus_actual === 0 || estatus_actual === 3){
-        const QUERY = `CALL editarEstatusReporte(${id_user_cc}, ${nuevo_estatus}, ${id_reporte});`;
+        const QUERY = `CALL editarEstatusReporte(${id_user_cc}, ${nuevo_estatus}, ${estatus_chat}, ${id_reporte});`;
 
         MySQL.ejecutarQuery(QUERY, (err: any, respuesta: any) =>{
         if(err) {
@@ -63,7 +64,6 @@ function cerrarPeticion( data: any, callback: Function){
     
     // Decodificar token 
     const tokenDecodificado = decodificarToken(token);
-
     if(tokenDecodificado.ok && tokenDecodificado.usuario){
         id_user_cc = tokenDecodificado.usuario.id_usuario;
         // console.log('EL ID DEL USUARIO ES: ' + id_user_cc);

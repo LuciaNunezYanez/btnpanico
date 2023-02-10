@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
+var verificaToken = require('../server/middlewares/authenticacion').verificaToken;
 var router = express_1.Router();
 // verificaToken,
 router.get('/:id', function (req, res) {
@@ -29,11 +29,28 @@ router.get('/:id', function (req, res) {
         }
     });
 });
+router.get('/app/personales/:id', function (req, res) {
+    var query = "CALL getReportesUsuarioApp(" + req.params.id + ")";
+    mysql_1.default.ejecutarQueryPr(query)
+        .then(function (reportes) {
+        return res.json({
+            ok: true,
+            reportes: reportes[0]
+        });
+    })
+        .catch(function () {
+        return res.json({
+            ok: false,
+            mensaje: 'No se pudieron obtener los reportes.'
+        });
+    });
+});
 // Trae el reporte completo (excepto activaciones, coordenadas y multimedia)
 router.get('/full/:id', function (req, res) {
     var query = "CALL getReporteFull(" + mysql_1.default.instance.cnn.escape(req.params.id) + ")";
-    console.log(query);
+    // console.log(query);
     mysql_1.default.ejecutarQuery(query, function (err, reporte) {
+        var _a, _b;
         if (err) {
             return res.json({
                 ok: false,
@@ -41,9 +58,23 @@ router.get('/full/:id', function (req, res) {
             });
         }
         else {
+            var contactos = [];
+            if ((_a = reporte[0][0]) === null || _a === void 0 ? void 0 : _a.nombre_contacto_emerg) {
+                for (var index = 0; index < reporte[0].length; index++) {
+                    contactos.push({
+                        nombre_contacto_emerg: reporte[0][index].nombre_contacto_emerg,
+                        telefono_contacto_emerg: reporte[0][index].telefono_contacto_emerg,
+                        parentezco_contacto_emerg: reporte[0][index].parentezco_contacto_emerg
+                    });
+                }
+            }
+            if (!((_b = reporte[0][0]) === null || _b === void 0 ? void 0 : _b.id_reporte)) {
+                return res.json({ ok: false, error: 'No existe el reporte' });
+            }
             return res.json({
                 ok: true,
-                reporteFull: reporte[0][0]
+                reporteFull: reporte[0][0],
+                contactos: contactos
             });
         }
     });

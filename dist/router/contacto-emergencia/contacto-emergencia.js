@@ -16,7 +16,6 @@ router.get('/:id', function (req, res) {
     }
     var QUERY = "CALL getContactEmergAPP(" + id_usuario + ");";
     mysql_1.default.ejecutarQuery(QUERY, function (err, resp) {
-        var _a;
         if (err) {
             return res.json({
                 ok: false,
@@ -24,44 +23,32 @@ router.get('/:id', function (req, res) {
             });
         }
         else {
-            if (!((_a = resp[0][0]) === null || _a === void 0 ? void 0 : _a.id_contacto_emergencia)) {
-                return res.json({
-                    ok: false,
-                    message: 'Sin contacto de emergencia'
-                });
-            }
             return res.json({
                 ok: true,
-                contacto_emergencia: resp[0][0]
+                contactos: resp[0]
             });
         }
     });
 });
-router.post('/', function (req, res) {
-    var id_usuario = mysql_1.default.instance.cnn.escape(req.body.idUsuario);
-    var nombre = mysql_1.default.instance.cnn.escape(req.body.nombre_contacto_emerg);
-    var telefono = mysql_1.default.instance.cnn.escape(req.body.telefono_contacto_emerg);
-    var parentezco = mysql_1.default.instance.cnn.escape(req.body.parentezco_contacto_emerg || '');
-    if (id_usuario === undefined || nombre === undefined || telefono === undefined || nombre.length < 5 || telefono.length < 9) {
-        return res.json({
-            ok: false,
-            message: 'Datos del contacto incompletos'
+router.post('/:id', function (req, res) {
+    var id_usuario = mysql_1.default.instance.cnn.escape(req.params.id);
+    var contactos = req.body;
+    for (var index = 0; index < contactos.length; index++) {
+        var nombre = mysql_1.default.instance.cnn.escape(contactos[index].nombre_contacto_emerg);
+        var telefono = mysql_1.default.instance.cnn.escape(contactos[index].telefono_contacto_emerg);
+        var parentezco = mysql_1.default.instance.cnn.escape(contactos[index].parentezco_contacto_emerg || '');
+        var QUERY = "CALL addContactoEmergencia(" + nombre + ", " + telefono + ", " + parentezco + ", " + id_usuario + ");";
+        mysql_1.default.ejecutarQuery(QUERY, function (err, resp) {
+            if (err) {
+                return res.json({
+                    ok: false,
+                    message: err['sqlMessage']
+                });
+            }
         });
     }
-    var QUERY = "CALL addContactoEmergencia(" + nombre + ", " + telefono + ", " + parentezco + ", " + id_usuario + ");";
-    mysql_1.default.ejecutarQuery(QUERY, function (err, resp) {
-        if (err) {
-            return res.json({
-                ok: false,
-                message: err['sqlMessage']
-            });
-        }
-        else {
-            return res.json({
-                ok: !(resp[0][0]['res'] === 0),
-                id_contacto_emergencia: resp[0][0]['id_contacto_emergencia']
-            });
-        }
+    return res.json({
+        ok: true
     });
 });
 exports.default = router;

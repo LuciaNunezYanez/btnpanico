@@ -24,7 +24,7 @@ var MySQL = /** @class */ (function () {
             host: '10.11.118.91',
             user: process.env.USERDB || 'root',
             password: process.env.PASSWORDB || 'M7750la?',
-            database: process.env.NAMEDATABASE || 'db_btn_panico_modif',
+            database: process.env.NAMEDATABASE || 'db_btn_panico_fnl',
             debug: false,
             waitForConnections: true
         });
@@ -63,14 +63,15 @@ var MySQL = /** @class */ (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.instance.cnn.query(query, function (err, results, fields) {
+                var _a;
                 if (err) {
-                    console.log('======== Error al ejecutar query ========');
-                    console.log(query);
-                    console.log(err);
-                    console.log('=========================================');
-                    reject(err);
+                    console.log('======== Error al ejecutar query (promesa) ========');
+                    // console.log(query);
+                    // console.log(err);
+                    // console.log('=========================================');
+                    return reject(err);
                 }
-                if (results.length === 0) {
+                if (((_a = results) === null || _a === void 0 ? void 0 : _a.length) === 0) {
                     resolve('El registro solicitado no existe');
                 }
                 else {

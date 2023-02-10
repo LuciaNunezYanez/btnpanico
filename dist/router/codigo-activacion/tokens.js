@@ -66,4 +66,71 @@ router.put('/:id_usuario', function (req, res) {
         }
     });
 });
+// Es igual al de arriba, pero para unificar las rutas
+router.put('/app/:id_usuario', function (req, res) {
+    var id_usuario = Number.parseInt(req.params.id_usuario);
+    var token = mysql_1.default.instance.cnn.escape(req.body.token);
+    var queryEditar = "CALL updateTokenApp(" + id_usuario + ", " + token + ");";
+    // console.log(queryEditar);
+    mysql_1.default.ejecutarQuery(queryEditar, function (err, resultado) {
+        var _a;
+        if (err) {
+            return res.json({
+                ok: false,
+                error: err
+            });
+        }
+        else {
+            if (((_a = resultado) === null || _a === void 0 ? void 0 : _a.affectedRows) === 1) {
+                return res.json({
+                    ok: true,
+                    res: {
+                        message: 'Éxito al modificar token'
+                    }
+                });
+            }
+            else {
+                return res.json({
+                    ok: false,
+                    res: {
+                        message: 'No se modificó ningún token'
+                    }
+                });
+            }
+        }
+    });
+});
+// updateTokenCC
+router.put('/cc/:id_usuario', function (req, res) {
+    var id_usuario = Number.parseInt(req.params.id_usuario);
+    var token = mysql_1.default.instance.cnn.escape(req.body.token);
+    var queryEditar = "CALL updateTokenCC(" + id_usuario + ", " + token + ");";
+    // console.log(queryEditar);
+    mysql_1.default.ejecutarQuery(queryEditar, function (err, resultado) {
+        if (err) {
+            return res.json({
+                ok: false,
+                error: err
+            });
+        }
+        else {
+            if (resultado.affectedRows) {
+                return res.json({
+                    ok: true,
+                    res: {
+                        message: 'Éxito al modificar token'
+                    }
+                });
+            }
+            else {
+                return res.json({
+                    ok: false,
+                    res: {
+                        message: 'No se modificó ningún token'
+                    }
+                });
+            }
+        }
+    });
+});
 exports.default = router;

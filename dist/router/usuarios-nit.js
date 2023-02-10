@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-var _a = require('../server/middlewares/autenticacion'), verificaToken = _a.verificaToken, verificaAdmin_role = _a.verificaAdmin_role;
+var _a = require('../server/middlewares/authenticacion'), verificaToken = _a.verificaToken, verificaAdmin_role = _a.verificaAdmin_role;
 var bcrypt = require('bcrypt');
 var router = express_1.Router();
 var salt = bcrypt.genSaltSync(10);
@@ -26,6 +26,20 @@ router.get('/:id', [verificaToken, verificaAdmin_role], function (req, res) {
                 resp: usuario[0][0]
             });
         }
+    });
+});
+router.get('/asociac/:asoc', function (req, res) {
+    var query = "CALL getUsuariosAsocUnidad(" + req.params.asoc + ")";
+    mysql_1.default.ejecutarQueryPr(query).then(function (usuarios) {
+        return res.json({
+            ok: true,
+            usuarios: usuarios[0]
+        });
+    }).catch(function (err) {
+        return res.json({
+            ok: false,
+            resp: err
+        });
     });
 });
 router.get('/usuarios/:sala/:estacion/:dpto', function (req, res) {
@@ -65,7 +79,57 @@ router.post('/', function (req, res) {
     var depend = mysql_1.default.instance.cnn.escape(req.body.depend);
     var sexo = mysql_1.default.instance.cnn.escape(req.body.sexo);
     var estatus = req.body.estatus || 1;
-    var QUERY = "CALL addUsuarioCC(\n        " + nombre + ",\n        " + apePat + ",\n        " + apeMat + ",\n        " + usuario + ",\n        " + contrEncript + ",\n        " + tipoUsuario + ",\n        " + depend + ",\n        " + sexo + ",\n        " + estatus + ");";
+    var sala = mysql_1.default.instance.cnn.escape(req.body.sala || 'C5DURANGO');
+    var estacion = req.body.estacion || 2020023;
+    var asociacion = req.body.asociacion || 0;
+    var dpto = mysql_1.default.instance.cnn.escape(req.body.dpto || '');
+    var p_normal = 0, p_tr = 0, p_admin = 0, p_app_emerg = 0;
+    switch (req.body.privilegio) {
+        case 'p_normal':
+            p_normal = 1;
+            p_tr = 0;
+            p_admin = 0;
+            p_app_emerg = 0;
+            break;
+        case 'p_tr':
+            p_normal = 0;
+            p_tr = 1;
+            p_admin = 0;
+            p_app_emerg = 0;
+            break;
+        case 'p_normal_admin':
+            p_normal = 1;
+            p_tr = 0;
+            p_admin = 1;
+            p_app_emerg = 0;
+            break;
+        case 'p_tr_admin':
+            p_normal = 0;
+            p_tr = 1;
+            p_admin = 1;
+            p_app_emerg = 0;
+            break;
+        case 'p_app_emerg':
+            p_normal = 0;
+            p_tr = 0;
+            p_admin = 0;
+            p_app_emerg = 1;
+            break;
+        default:
+            p_normal = 0;
+            p_tr = 0;
+            p_admin = 0;
+            p_app_emerg = 0;
+            break;
+    }
+    var QUERY;
+    // Si existe la unidad se agrega a la tabla, de lo contrario es un usuario normal
+    if (req.body.id_unidad) {
+        QUERY = "CALL addUsuarioCCUnidad(\n            " + nombre + ",\n            " + apePat + ",\n            " + apeMat + ",\n            " + usuario + ",\n            " + contrEncript + ",\n            " + tipoUsuario + ",\n            " + depend + ",\n            " + sexo + ",\n            " + estatus + ", \n            " + sala + ", \n            " + estacion + ", \n            " + asociacion + ",\n            " + dpto + ",\n            " + req.body.id_unidad + ",\n            " + p_normal + ", \n            " + p_tr + ", \n            " + p_admin + ", \n            " + p_app_emerg + ");";
+    }
+    else {
+        QUERY = "CALL addUsuarioCC(\n            " + nombre + ",\n            " + apePat + ",\n            " + apeMat + ",\n            " + usuario + ",\n            " + contrEncript + ",\n            " + tipoUsuario + ",\n            " + depend + ",\n            " + sexo + ",\n            " + estatus + ", \n            " + sala + ", \n            " + estacion + ", \n            " + asociacion + ",\n            " + dpto + ", \n            " + p_normal + ", \n            " + p_tr + ", \n            " + p_admin + ", \n            " + p_app_emerg + ");";
+    }
     mysql_1.default.ejecutarQuery(QUERY, function (err, data) {
         if (err) {
             return res.status(400).json({

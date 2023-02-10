@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../../mysql/mysql"));
-var verificaToken = require('../../server/middlewares/autenticacion').verificaToken;
 var router = express_1.Router();
 router.post('/', function (req, res) {
     var body = req.body;
@@ -41,14 +40,14 @@ router.post('/', function (req, res) {
     var id_foto_perfil = Number.parseInt(body.id_foto_perfil) || 0;
     //console.log('Body id grupo: ', body.id_grupo + ' Y ' + id_grupo);
     // SEPARAR LA FECHA DE NACIMIENTO DEL USUARIO (YYYY/mm/dd)
-    var fecha_nacimiento_lista = '0000/00/00';
+    var fecha_nacimiento_lista = '1900/01/01';
     if (fecha_nacimiento_sucia && ((fecha_nacimiento_sucia.substring(2, 3) === '-') || (fecha_nacimiento_sucia.substring(2, 3) === '/'))) {
         var fecha_separada = fecha_nacimiento_sucia.split('/');
         fecha_nacimiento_lista = fecha_separada[2] + '/' + fecha_separada[1] + '/' + fecha_separada[0];
         fecha_nacimiento_lista = mysql_1.default.instance.cnn.escape(fecha_nacimiento_lista);
     }
     else {
-        fecha_nacimiento_lista = mysql_1.default.instance.cnn.escape(fecha_nacimiento_sucia);
+        fecha_nacimiento_lista = mysql_1.default.instance.cnn.escape(fecha_nacimiento_lista);
     }
     var QUERY = "CALL addUsuarioAppIndependiente(\n        " + calle + ",\n        " + numero + ",\n        " + numeroInt + ",\n        " + colonia + ",\n        " + cp + ",\n        " + entre_calle_1 + ",\n        " + entre_calle_2 + ",\n        " + fachada + ",\n        " + id_localidad + ",\n        " + lat_dir + ",\n        " + lgn_dir + ",\n        \n\n        " + nombres_usuarios_app + ",\n        " + apell_pat + ",\n        " + apell_mat + ",\n        " + fecha_nacimiento_lista + ",\n        " + sexo_app + ",\n        " + padecimientos + ",\n        " + tel_movil + ",\n        " + alergias + ",\n        " + tipo_sangre + ",\n        " + estatus_usuario + ",\n        " + correo_usuario + ",\n        " + id_grupo + ",\n        " + contrasena + ",\n\n        " + id_asociacion + ",\n        " + id_datos_medicos + ",\n        " + id_foto_perfil + ",\n\n        " + id_comercio + "\n        );";
     mysql_1.default.ejecutarQuery(QUERY, function (err, result) {

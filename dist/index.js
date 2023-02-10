@@ -30,14 +30,18 @@ var recuperacion_email_1 = __importDefault(require("./router/recuperacion-email"
 var datos_medicos_1 = __importDefault(require("./router/registro-alertagenero/datos-medicos"));
 var contacto_emergencia_1 = __importDefault(require("./router/contacto-emergencia/contacto-emergencia"));
 var tokens_1 = __importDefault(require("./router/codigo-activacion/tokens"));
+var tokens_app_1 = __importDefault(require("./router/codigo-activacion/tokens_app"));
 var mensajes_1 = __importDefault(require("./router/firebase/mensajes"));
 var video_1 = __importDefault(require("./router/multimedia/video"));
+var corporaciones_1 = __importDefault(require("./router/corporacion/corporaciones"));
+var unidades_1 = __importDefault(require("./router/unidades/unidades"));
+var chat_1 = __importDefault(require("./router/chat/chat"));
 var body_parser_1 = __importDefault(require("body-parser"));
-// import KML_Operations from './kml/kml';
 var cors = require('cors');
 // Config FB
 var admin = require('firebase-admin');
-var serviceAccount = require('../dist/firebase/fir-storage-sdk.json');
+// /dist/firebase/fir-storage-sdk.json
+var serviceAccount = require('./firebase/fir-storage-sdk.json');
 var server = server_1.default.instance;
 var kml = kml_1.default.instance;
 // BodyParser
@@ -47,15 +51,13 @@ server.app.use(body_parser_1.default.json({ limit: '50mb' }));
 // server.app.use(cors ({origin: true, credentials: true})); // Se cambia por la siguiente configuración
 server.app.use(cors(), function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
-    // res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-    // res.header('Access-Control-Allow-Origin', '10.11.127.70');
     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Content-Type', 'application/x-www-form-urlencoded');
+    // res.header('Access-Control-Allow-Headers', '*');
+    // Método que hace que descargue los archivos, el que sea
+    // res.header('Content-Type', 'application/x-www-form-urlencoded');
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-    // Esta de prueba
-    res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=Strict");
+    // res.setHeader("Set-Cookie", "HttpOnly;Secure;SameSite=Strict");
     next();
 });
 // Rutas de servicios 
@@ -84,8 +86,12 @@ server.app.use('/recuperar', recuperacion_email_1.default);
 server.app.use('/datosmedicos', datos_medicos_1.default);
 server.app.use('/contactoemerg', contacto_emergencia_1.default);
 server.app.use('/token', tokens_1.default);
+server.app.use('/tokenapp', tokens_app_1.default);
 server.app.use('/mensajes', mensajes_1.default);
 server.app.use('/videos', video_1.default);
+server.app.use('/corporaciones', corporaciones_1.default);
+server.app.use('/unidades', unidades_1.default);
+server.app.use('/chat', chat_1.default);
 server.start(function () {
     console.log("Servidor corriendo en el puerto " + server.port);
 });

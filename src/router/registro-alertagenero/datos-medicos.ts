@@ -47,8 +47,9 @@ router.post('/', (req: Request, res: Response) => {
     const peso = MySQL.instance.cnn.escape(req.body.peso || '');
     const estatura = MySQL.instance.cnn.escape(req.body.estatura || '');
     const senas_particulares = MySQL.instance.cnn.escape(req.body.senas_particulares || '');
+    const padecimientos_psic = MySQL.instance.cnn.escape(req.body.padecimientosPsic || '');
 
-    const QUERY = `CALL addDatosMedicos(${habla}, ${escucha}, ${lee}, ${escribe}, ${habla_LSM}, ${toma_medicamentos}, ${peso}, ${estatura}, ${senas_particulares});`
+    const QUERY = `CALL addDatosMedicos(${habla}, ${escucha}, ${lee}, ${escribe}, ${habla_LSM}, ${toma_medicamentos}, ${peso}, ${estatura}, ${senas_particulares}, ${padecimientos_psic});`
     
     MySQL.ejecutarQuery(QUERY, (err: any, resp: any[][]) => {
         if(err){

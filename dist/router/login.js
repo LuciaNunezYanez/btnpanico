@@ -10,14 +10,16 @@ var jwt = require('jsonwebtoken');
 var router = express_1.Router();
 // Log in
 router.post('/', function (req, res) {
+    // console.log('LOGIN1');
     // console.log(req.body);
     var usuario = mysql_1.default.instance.cnn.escape(req.body.usuario);
     var passNoEnctrip = req.body.contrasena;
-    var query = "CALL getUsuarioCCID(" + usuario + ")";
+    // const query = `CALL getUsuarioCCID(${usuario})`;
+    var query = "CALL getLoginMon(" + usuario + ");";
     if (usuario === undefined || passNoEnctrip === undefined) {
         return res.json({
             ok: false,
-            resp: 'Ingrese datos completos por favor.'
+            resp: 'Ingrese los datos completos por favor.'
         });
     }
     mysql_1.default.ejecutarQuery(query, function (err, data) {
@@ -36,7 +38,7 @@ router.post('/', function (req, res) {
                         resp: 'Datos no encontrados'
                     });
                 }
-                var _b = data[0][0], id_usuarios_cc = _b.id_usuarios_cc, usuario_1 = _b.usuario, nombres_usuarios_cc = _b.nombres_usuarios_cc, apellido_paterno = _b.apellido_paterno, apellido_materno = _b.apellido_materno, tipo_usuario = _b.tipo_usuario, dependencia = _b.dependencia, sexo_cc = _b.sexo_cc, id_estacion_pertenece = _b.id_estacion_pertenece, estatus_usuario = _b.estatus_usuario, id_asociacion_cc = _b.id_asociacion_cc, sala_usuario_cc = _b.sala_usuario_cc;
+                var _b = data[0][0], id_usuarios_cc = _b.id_usuarios_cc, usuario_1 = _b.usuario, nombres_usuarios_cc = _b.nombres_usuarios_cc, apellido_paterno = _b.apellido_paterno, apellido_materno = _b.apellido_materno, tipo_usuario = _b.tipo_usuario, dependencia = _b.dependencia, sexo_cc = _b.sexo_cc, id_estacion_pertenece = _b.id_estacion_pertenece, estatus_usuario = _b.estatus_usuario, id_asociacion_cc = _b.id_asociacion_cc, sala_usuario_cc = _b.sala_usuario_cc, p_admin = _b.p_admin, p_normal = _b.p_normal, p_tr = _b.p_tr;
                 // console.log('ESTACION PERTENECE', id_estacion_pertenece);
                 // VALIDAR USUARIO ACTIVO 
                 if (estatus_usuario === 0) {
@@ -56,7 +58,10 @@ router.post('/', function (req, res) {
                     sexo: sexo_cc,
                     estatus: estatus_usuario,
                     id_estacion_pertenece: id_estacion_pertenece,
-                    id_asociacion_cc: id_asociacion_cc
+                    id_asociacion_cc: id_asociacion_cc,
+                    p_admin: p_admin,
+                    p_normal: p_normal,
+                    p_tr: p_tr
                 };
                 var expiresIn = 60 * 60 * 12;
                 //GENERAR TOKEN
@@ -77,6 +82,9 @@ router.post('/', function (req, res) {
                         id_asociacion: id_asociacion_cc,
                         expiresIn: expiresIn,
                         sala: sala_usuario_cc,
+                        p_admin: p_admin,
+                        p_normal: p_normal,
+                        p_tr: p_tr,
                         token: token
                     });
                 }
@@ -92,12 +100,13 @@ router.post('/', function (req, res) {
         catch (e) {
             return res.json({
                 ok: false,
-                resp: e.message
+                resp: e
             });
         }
     });
 });
 router.post('/app/', function (req, res) {
+    // console.log('LOGIN2');
     var correo = req.body.c;
     var contrasena = req.body.ct;
     if (!correo || !contrasena) {
@@ -130,4 +139,125 @@ router.post('/app/', function (req, res) {
         }
     });
 });
+router.post('/mult/app/', function (req, res) {
+    // console.log('LOGIN3');
+    var usuario = mysql_1.default.instance.cnn.escape(req.body.usuario);
+    var contrasenaPlana = req.body.contrasena;
+    var query = "CALL getLogin(" + usuario + ")";
+    if (usuario === undefined || contrasenaPlana === undefined) {
+        return res.json({
+            ok: false,
+            resp: 'Ingrese datos completos por favor.'
+        });
+    }
+    mysql_1.default.ejecutarQueryPr(query).then(function (data) {
+        try {
+            var usuarioDB = data[0][0];
+            console.log('111');
+            if (usuarioDB === undefined) {
+                return res.json({
+                    ok: false,
+                    mensaje: 'Usuario no encontrado'
+                });
+            }
+            if (usuarioDB.id_usuarios_app) { // Usuario app no encripta la contraseña 
+                if (contrasenaPlana != usuarioDB.contrasena_app) {
+                    // Existe pero no pasa
+                    console.log('222');
+                    usuarioDB.access = false;
+                    return res.json({
+                        ok: true,
+                        usuario: {
+                            tipo: 'na',
+                            mensaje: 'Contraseña incorrecta',
+                            exist: 1,
+                            access: false
+                        }
+                    });
+                }
+                else {
+                    console.log('333');
+                    // Todo bien 
+                    // Es usuario de la app
+                    // Encriptar token
+                    var token = generarToken({
+                        tipo: usuarioDB.tipo,
+                        id_comercio: usuarioDB.id_comercio,
+                        id_direccion: usuarioDB.id_direccion,
+                        id_usuarios_app: usuarioDB.id_usuarios_app,
+                        id_asociacion_pertenece: usuarioDB.id_asociacion_pertenece
+                    });
+                    usuarioDB.access = true;
+                    return res.json({
+                        ok: true,
+                        usuario: usuarioDB,
+                        token: token
+                    });
+                }
+            }
+            else if (usuarioDB.id_usuarios_cc) { // Usuario cc si la encripa
+                if (!bcrypt.compareSync(contrasenaPlana, usuarioDB.contrasena)) {
+                    console.log('444');
+                    // Existe pero no pasa
+                    usuarioDB.access = false;
+                    return res.json({
+                        ok: true,
+                        usuario: {
+                            tipo: 'na',
+                            mensaje: 'Contraseña incorrecta',
+                            exist: 1,
+                            access: false
+                        }
+                    });
+                }
+                else {
+                    console.log('555');
+                    // Todo bien
+                    // Es usuario cc
+                    // Encriptar token
+                    var token = generarToken({
+                        tipo: usuarioDB.tipo,
+                        id_comercio: 0,
+                        id_direccion: 0,
+                        id_usuarios_cc: usuarioDB.id_usuarios_cc,
+                        id_asociacion_cc: usuarioDB.id_asociacion_cc
+                    });
+                    usuarioDB.access = true;
+                    return res.json({
+                        ok: true,
+                        usuario: usuarioDB,
+                        token: token
+                    });
+                }
+            }
+            else {
+                console.log('666');
+                usuarioDB.access = false;
+                return res.json({
+                    ok: true,
+                    usuario: usuarioDB
+                });
+            }
+        }
+        catch (err) {
+            console.log('777');
+            return res.json({
+                ok: false,
+                resp: err
+            });
+        }
+    }).catch(function (err) {
+        console.log('888');
+        return res.json({
+            ok: false,
+            resp: err
+        });
+    });
+});
+function generarToken(data) {
+    var token = jwt.sign({
+        usuario: data
+    }, process.env.SEED || 'este-es-el-seed-de-desarrollo');
+    return token;
+}
 exports.default = router;

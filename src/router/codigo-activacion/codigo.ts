@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import MySQL from '../../mysql/mysql';
-const { verificaToken } = require('../../server/middlewares/autenticacion');
 const jwt = require('jsonwebtoken');
 const router = Router();
 

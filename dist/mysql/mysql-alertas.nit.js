@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var mysql_1 = __importDefault(require("./mysql"));
-var decodificarToken = require('../server/middlewares/autenticacion').decodificarToken;
+var decodificarToken = require('../server/middlewares/authenticacion').decodificarToken;
 function obtenerAlertasPendientes(data, callback) {
     // data es object {estacion y sala}
     // const query = `CALL getReportesPend(${data.idEstacion}, ${data.sala});`;
@@ -30,9 +30,10 @@ function obtenerAlertasPendientes(data, callback) {
 function abrirPeticion(alerta, callback) {
     // console.log('ABRIR PETICION MYSQL ALERTAS');
     // console.log(alerta);
+    var estatus_chat = 1;
     var id_reporte = alerta.id_reporte, estatus_actual = alerta.estatus_actual, id_user_cc = alerta.id_user_cc, nuevo_estatus = alerta.nuevo_estatus;
     if (estatus_actual === 0 || estatus_actual === 3) {
-        var QUERY = "CALL editarEstatusReporte(" + id_user_cc + ", " + nuevo_estatus + ", " + id_reporte + ");";
+        var QUERY = "CALL editarEstatusReporte(" + id_user_cc + ", " + nuevo_estatus + ", " + estatus_chat + ", " + id_reporte + ");";
         mysql_1.default.ejecutarQuery(QUERY, function (err, respuesta) {
             if (err) {
                 return callback({

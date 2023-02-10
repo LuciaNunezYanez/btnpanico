@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var _a = require('../server/middlewares/autenticacion'), verificaToken = _a.verificaToken, verificaTokenComercio = _a.verificaTokenComercio;
 var obtenerAlertasPendientes = require('../mysql/mysql-alertas.nit').obtenerAlertasPendientes;
 var Alertas = require('../server/classes/alertas').Alertas;
 var server_1 = __importDefault(require("../server/server"));
@@ -38,7 +37,6 @@ router.post('/', function (req, res) {
 });
 // Registrar nueva alerta de panico con coodenadas
 router.post('/coordenadas/', function (req, res) {
-    console.log('/alerta/coordenadas/', req.body);
     var idUserCc = 1; // 1 = Sin atender
     var idComercReporte = req.body.idComercio;
     var idUserApp = req.body.idUsuario;
@@ -60,12 +58,6 @@ router.post('/coordenadas/', function (req, res) {
             message: 'Datos de comercio incompletos'
         });
     }
-    // if(req.body?.latitud != 0.0 && req.body?.latitud != undefined){
-    //     // Trabajar con las coordenadas y poligonos.
-    //     latitud = MySQL.instance.cnn.escape(req.body.latitud);
-    //     longitud = MySQL.instance.cnn.escape(req.body.longitud);
-    //     lugar_ataque = MySQL.instance.cnn.escape(req.body.lugar || req.body.tipo);
-    // } 
     kml_1.default.instance.buscarSala(req.body).then(function (sala) {
         var query = "CALL addReporteCoordRtID(\n            " + idUserCc + ",\n            " + idComercReporte + ",\n            " + idUserApp + ",\n            " + idUnidad + ",\n            " + fhDoc + ",\n            " + fhAtaque + ",\n            " + tipoInc + ",\n            " + mysql_1.default.instance.cnn.escape(descripEmerg) + ",\n            " + clasifEmerg + ",\n            " + estatusActual + ",\n            " + cierreConcl + ",\n            " + mysql_1.default.instance.cnn.escape(sala) + ",\n    \n            " + latitud + ",\n            " + longitud + ",\n            " + fhAtaque + ",\n            " + lugar_ataque + ",\n            @last_id_reporte);";
         ejecutarC(query, res, idComercReporte, idUserApp, sala);
@@ -188,6 +180,7 @@ function ejecutarC(query, res, idComercReporte, idUserApp, sala) {
             }
             else {
                 // Se retornan los datos del reporte 
+                // console.log(data);
                 var reporteAgregado = data[0][0].last_id;
                 var estacion_1 = data[0][0].estacion;
                 var coordenada = data[0][0].id_coord;
@@ -208,7 +201,7 @@ function ejecutarC(query, res, idComercReporte, idUserApp, sala) {
                         socketServer.emitirAlertasActualizadas(Number.parseInt(estacion_1), alertas, sala);
                     }
                 });
-                console.log("Se cre\u00F3 el reporte " + reporteAgregado + " <==============");
+                console.log("Se cre\u00F3 el reporte " + reporteAgregado + " <==============1");
                 return res.json({
                     ok: true,
                     reporteCreado: reporteAgregado,
@@ -241,7 +234,8 @@ function ejecutar(query, res, idComercReporte, idUserApp, sala) {
                 var reporteAgregado = data[0][0].last_id;
                 var estacion_2 = data[0][0].estacion;
                 var coordenada = data[0][0].id_coord;
-                // console.log('(2) LA ESTACION ES: ' + estacion);
+                // console.log('(2) LA ESTACION ES: ');
+                // console.log(data);
                 // console.log(data[0][0]);
                 if (estacion_2 == 0 || estacion_2 == undefined) {
                     estacion_2 = 2020023;
@@ -257,7 +251,7 @@ function ejecutar(query, res, idComercReporte, idUserApp, sala) {
                         socketServer.emitirAlertasActualizadas(Number.parseInt(estacion_2), alertas, sala);
                     }
                 });
-                console.log("Se cre\u00F3 el reporte " + reporteAgregado + " <==============");
+                console.log("Se cre\u00F3 el reporte " + reporteAgregado + " <==============2");
                 return res.json({
                     ok: true,
                     reporteCreado: reporteAgregado,

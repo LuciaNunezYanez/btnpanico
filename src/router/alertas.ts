@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-const { verificaToken, verificaTokenComercio } = require('../server/middlewares/autenticacion');
 const { obtenerAlertasPendientes } = require('../mysql/mysql-alertas.nit');
 const { Alertas }  = require('../server/classes/alertas');
 import Server from '../server/server';
@@ -68,9 +67,6 @@ router.post('/', (req: Request, res: Response) => {
 // Registrar nueva alerta de panico con coodenadas
 router.post('/coordenadas/', (req: Request, res: Response) => {
 
-
-    console.log('/alerta/coordenadas/', req.body);
-
     const idUserCc: number = 1; // 1 = Sin atender
     const idComercReporte: number = req.body.idComercio;
     const idUserApp: number = req.body.idUsuario;
@@ -93,15 +89,7 @@ router.post('/coordenadas/', (req: Request, res: Response) => {
             ok: false, 
             message: 'Datos de comercio incompletos'
         });
-    }
-
-    // if(req.body?.latitud != 0.0 && req.body?.latitud != undefined){
-    //     // Trabajar con las coordenadas y poligonos.
-    //     latitud = MySQL.instance.cnn.escape(req.body.latitud);
-    //     longitud = MySQL.instance.cnn.escape(req.body.longitud);
-    //     lugar_ataque = MySQL.instance.cnn.escape(req.body.lugar || req.body.tipo);
-    // } 
-    
+    }    
 
     KML.instance.buscarSala(req.body).then( (sala: any )=>{
         const query = `CALL addReporteCoordRtID(
@@ -372,7 +360,7 @@ function ejecutarC(query: string, res: Response, idComercReporte: any, idUserApp
                 });
             } else {
                 // Se retornan los datos del reporte 
-                
+                // console.log(data);
                 const reporteAgregado = data[0][0].last_id;
                 let estacion = data[0][0].estacion;
                 const coordenada = data[0][0].id_coord;
@@ -395,7 +383,7 @@ function ejecutarC(query: string, res: Response, idComercReporte: any, idUserApp
                         socketServer.emitirAlertasActualizadas( Number.parseInt(estacion), alertas, sala);
                     }
                 });
-                console.log(`Se creó el reporte ${reporteAgregado} <==============`);
+                console.log(`Se creó el reporte ${reporteAgregado} <==============1`);
                 return res.json({
                     ok: true, 
                     reporteCreado: reporteAgregado,
@@ -428,7 +416,8 @@ function ejecutar(query: string, res: Response, idComercReporte: any, idUserApp:
                 let estacion = data[0][0].estacion;
                 const coordenada = data[0][0].id_coord;
     
-                // console.log('(2) LA ESTACION ES: ' + estacion);
+                // console.log('(2) LA ESTACION ES: ');
+                // console.log(data);
                 // console.log(data[0][0]);
                 if (estacion == 0 || estacion == undefined){
                     estacion = 2020023;
@@ -444,7 +433,7 @@ function ejecutar(query: string, res: Response, idComercReporte: any, idUserApp:
                         socketServer.emitirAlertasActualizadas( Number.parseInt(estacion), alertas, sala);
                     }
                 });
-                console.log(`Se creó el reporte ${reporteAgregado} <==============`);
+                console.log(`Se creó el reporte ${reporteAgregado} <==============2`);
                 return res.json({
                     ok: true, 
                     reporteCreado: reporteAgregado,

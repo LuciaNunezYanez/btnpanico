@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
 var server_1 = __importDefault(require("../server/server"));
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var router = express_1.Router();
 var socketServer = server_1.default.instance;
 // Log in
@@ -57,7 +56,7 @@ router.post('/:id_reporte', function (req, res) {
             catch (e) {
                 return res.status(400).json({
                     ok: false,
-                    resp: e.message
+                    resp: e
                 });
             }
         });
@@ -98,7 +97,7 @@ router.get('/:id_reporte', function (req, res) {
             catch (e) {
                 return res.status(400).json({
                     ok: false,
-                    resp: e.message
+                    resp: e
                 });
             }
         });

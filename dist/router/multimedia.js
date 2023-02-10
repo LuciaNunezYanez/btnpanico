@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var mysql_1 = __importDefault(require("../mysql/mysql"));
-var verificaToken = require('../server/middlewares/autenticacion').verificaToken;
 var router = express_1.Router();
 // Obtener archivos multimedia por ID 
 router.get('/:id', function (req, res) {

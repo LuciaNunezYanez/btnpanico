@@ -29,7 +29,7 @@ export default class MySQL {
             host: '10.11.118.91',
             user: process.env.USERDB || 'root',
             password: process.env.PASSWORDB || 'M7750la?',
-            database: process.env.NAMEDATABASE || 'db_btn_panico_modif',
+            database: process.env.NAMEDATABASE || 'db_btn_panico_fnl',
             debug: false,
             waitForConnections: true
         });
@@ -72,13 +72,13 @@ export default class MySQL {
         return new Promise( (resolve, reject) => {
             this.instance.cnn.query( query, (err: any , results: Object[], fields: any ) => {
                 if(err){
-                    console.log('======== Error al ejecutar query ========');
-                    console.log(query);
-                    console.log(err);
-                    console.log('=========================================');
-                    reject(err)
+                    console.log('======== Error al ejecutar query (promesa) ========');
+                    // console.log(query);
+                    // console.log(err);
+                    // console.log('=========================================');
+                    return reject(err)
                 }
-                if(results.length === 0 ){
+                if(results?.length === 0 ){
                     resolve('El registro solicitado no existe');
                 } else {
                     resolve(results);

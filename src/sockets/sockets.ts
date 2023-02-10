@@ -3,7 +3,6 @@ import express = require('express');
 import MySQL from '../mysql/mysql';
 
 const { obtenerAlertasPendientes } = require('../mysql/mysql-alertas.nit');
-const { verificaToken } = require('../server/middlewares/autenticacion');
 const { Usuarios }  = require('../server/classes/usuarios');
 const { Alertas }  = require('../server/classes/alertas');
 const jwt = require('jsonwebtoken');

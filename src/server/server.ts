@@ -20,8 +20,8 @@ export default class Server{
     private constructor(){
         this.port = process.env.PORT || 8888;
         this.app = express();
-        // this.hostname = '10.11.118.91';
-        this.hostname = '10.11.127.70';
+        this.hostname = process.env.HOST || '10.11.127.70';
+        // '10.11.118.91'
         // this.hostname = 'localhost'
         // Inicializar configuración de sockets 
         this.httpServer = new http.Server( this.app );
@@ -82,12 +82,12 @@ export default class Server{
 
     private publicFolder(){
         const publicPath = path.resolve(__dirname, '../public');
-        const publicPathArchivos = path.resolve(__dirname, '../public/archivos');
+        // // const publicPathArchivos = path.resolve(__dirname, '../public/archivos');
         this.app.use( express.static( publicPath ));
-        this.app.use( express.static( publicPathArchivos ));
+        // // this.app.use( express.static( publicPathArchivos ));
 
-        //Express HBS
-        this.app.set('view engine', 'hbs');
+        // //Express HBS
+        // this.app.set('view engine', 'hbs');
     }
 
     private escucharSockets(){

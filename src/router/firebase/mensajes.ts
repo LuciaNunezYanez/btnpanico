@@ -38,6 +38,14 @@ router.post('/:id_usuario', (req: Request, res: Response) => {
                 try { 
                     admin.messaging().sendToDevice(registrationToken, payload, options)
                         .then( (resp: any) => {
+                            if(resp.results[0].error){
+                                return res.json({
+                                    ok: false, 
+                                    message: 'Error al enviar mensaje', 
+                                    err: resp.results[0].error
+                                });
+                            }
+                            console.log(resp.results[0].error);
                             return res.json({
                                 ok: true,
                                 message: 'Éxito al enviar mensaje',
@@ -54,7 +62,7 @@ router.post('/:id_usuario', (req: Request, res: Response) => {
                 } catch(excepcion){
                     return res.json({
                         ok: false, 
-                        message: excepcion?.message
+                        message: excepcion
                     });
                 }
             } else {

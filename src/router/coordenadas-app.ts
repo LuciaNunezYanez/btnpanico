@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express';
 import MySQL from '../mysql/mysql';
 import Server from '../server/server';
 
-const { verificaToken } = require('../server/middlewares/autenticacion');
 const router = Router();
 const socketServer = Server.instance;
 
@@ -63,7 +62,7 @@ router.post('/:id_reporte', (req: Request, res: Response) => {
             } catch (e){
                 return res.status(400).json({
                     ok: false, 
-                    resp: e.message
+                    resp: e
                 });
             } 
         });
@@ -104,7 +103,7 @@ router.get('/:id_reporte', (req: Request, res: Response) => {
             } catch (e){
                 return res.status(400).json({
                     ok: false, 
-                    resp: e.message
+                    resp: e
                 });
             } 
         });

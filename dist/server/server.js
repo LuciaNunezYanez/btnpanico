@@ -20,8 +20,8 @@ var Server = /** @class */ (function () {
     function Server() {
         this.port = process.env.PORT || 8888;
         this.app = express();
-        // this.hostname = '10.11.118.91';
-        this.hostname = '10.11.127.70';
+        this.hostname = process.env.HOST || '10.11.127.70';
+        // '10.11.118.91'
         // this.hostname = 'localhost'
         // Inicializar configuración de sockets 
         this.httpServer = new http_1.default.Server(this.app);
@@ -73,11 +73,11 @@ var Server = /** @class */ (function () {
     };
     Server.prototype.publicFolder = function () {
         var publicPath = path.resolve(__dirname, '../public');
-        var publicPathArchivos = path.resolve(__dirname, '../public/archivos');
+        // // const publicPathArchivos = path.resolve(__dirname, '../public/archivos');
         this.app.use(express.static(publicPath));
-        this.app.use(express.static(publicPathArchivos));
-        //Express HBS
-        this.app.set('view engine', 'hbs');
+        // // this.app.use( express.static( publicPathArchivos ));
+        // //Express HBS
+        // this.app.set('view engine', 'hbs');
     };
     Server.prototype.escucharSockets = function () {
         var _this = this;

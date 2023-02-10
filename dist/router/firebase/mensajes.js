@@ -24,7 +24,7 @@ router.post('/:id_usuario', function (req, res) {
     // Obtener token de la base de datos
     var QUERY = "CALL getTokenApp(" + id_usuario + ");";
     mysql_1.default.ejecutarQuery(QUERY, function (err, resp) {
-        var _a, _b;
+        var _a;
         if (err) {
             return res.json({
                 ok: false,
@@ -38,6 +38,14 @@ router.post('/:id_usuario', function (req, res) {
                 try {
                     admin.messaging().sendToDevice(registrationToken, payload, options)
                         .then(function (resp) {
+                        if (resp.results[0].error) {
+                            return res.json({
+                                ok: false,
+                                message: 'Error al enviar mensaje',
+                                err: resp.results[0].error
+                            });
+                        }
+                        console.log(resp.results[0].error);
                         return res.json({
                             ok: true,
                             message: 'Éxito al enviar mensaje',
@@ -55,7 +63,7 @@ router.post('/:id_usuario', function (req, res) {
                 catch (excepcion) {
                     return res.json({
                         ok: false,
-                        message: (_b = excepcion) === null || _b === void 0 ? void 0 : _b.message
+                        message: excepcion
                     });
                 }
             }
